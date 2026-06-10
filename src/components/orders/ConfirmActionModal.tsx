@@ -4,12 +4,14 @@ export function ConfirmActionModal({
   title,
   body,
   confirmLabel,
+  cancelLabel = "계속 편집",
   onCancel,
   onConfirm,
 }: {
   title: string;
   body: string;
   confirmLabel: string;
+  cancelLabel?: string;
   onCancel: () => void;
   onConfirm: () => void;
 }) {
@@ -20,7 +22,7 @@ export function ConfirmActionModal({
         <p>{body}</p>
         <div className="confirm-modal__actions">
           <button type="button" onClick={onCancel}>
-            계속 편집
+            {cancelLabel}
           </button>
           <button className="danger-button" type="button" onClick={onConfirm}>
             {confirmLabel}

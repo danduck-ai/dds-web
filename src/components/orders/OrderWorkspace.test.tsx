@@ -1,9 +1,17 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { OrderWorkspace } from "./OrderWorkspace";
 import type { OrderListRow } from "@/features/orders/types";
+
+const refreshMock = vi.hoisted(() => vi.fn());
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    refresh: refreshMock,
+  }),
+}));
 
 const orders: OrderListRow[] = [
   {
@@ -85,6 +93,10 @@ function renderWorkspace(extraProps: Partial<React.ComponentProps<typeof OrderWo
 }
 
 describe("OrderWorkspace", () => {
+  beforeEach(() => {
+    refreshMock.mockClear();
+  });
+
   test("shows checkboxes and row actions in the active tab", () => {
     renderWorkspace();
 
@@ -138,6 +150,29 @@ describe("OrderWorkspace", () => {
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(screen.getByText(/납기 수량 합계/)).toBeInTheDocument();
+  });
+
+  test("prefills lookup selections when editing an order", async () => {
+    const user = userEvent.setup();
+    const onUpdateOrder = vi.fn().mockResolvedValue({ ok: true, message: "updated" });
+    renderWorkspace({ onUpdateOrder });
+
+    await user.click(screen.getByRole("button", { name: "수정" }));
+
+    expect(screen.getByLabelText("고객사 및 담당자")).toHaveValue("customer-1::contact-1");
+    expect(screen.getByLabelText("제품/설계")).toHaveValue("design-1");
+  });
+
+  test("refreshes server data after releasing an order", async () => {
+    const user = userEvent.setup();
+    renderWorkspace();
+
+    await user.click(screen.getByRole("button", { name: "전달" }));
+    const dialog = screen.getByRole("dialog", { name: "생산팀 전달 확인" });
+    expect(within(dialog).getByRole("button", { name: "돌아가기" })).toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "전달" }));
+
+    expect(refreshMock).toHaveBeenCalledTimes(1);
   });
 
   test("asks for confirmation before closing a dirty drawer", async () => {

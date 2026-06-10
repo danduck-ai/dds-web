@@ -25,18 +25,27 @@ const emptyForm: OrderFormInput = {
   schedules: [{ scheduledDate: "", quantity: 0 }],
 };
 
-function formFromOrder(order: OrderListRow | null): OrderFormInput {
+function formFromOrder(
+  order: OrderListRow | null,
+  contactOptions: ContactOption[],
+  designOptions: DesignOption[],
+): OrderFormInput {
   if (!order) {
     return emptyForm;
   }
+
+  const contactOption = contactOptions.find(
+    (option) => option.label === `${order.customerName} / ${order.contactName}`,
+  );
+  const designOption = designOptions.find((option) => option.designNo === order.designNo);
 
   return {
     requestedDate: order.requestedDate,
     channel: order.channel.startsWith("기타:") ? "기타" : order.channel,
     customChannel: order.channel.startsWith("기타:") ? order.channel.replace("기타:", "").trim() : "",
-    customerId: "",
-    contactId: "",
-    designId: "",
+    customerId: contactOption?.customerId ?? "",
+    contactId: contactOption?.contactId ?? "",
+    designId: designOption?.value ?? "",
     quantity: order.quantity,
     deliveryType: order.deliveryType,
     schedules: order.schedules.map((schedule) => ({ ...schedule })),
@@ -58,7 +67,7 @@ export function OrderDrawer({
   onClose: () => void;
   onSubmit: (input: OrderFormInput) => Promise<ActionResult>;
 }) {
-  const [form, setForm] = useState<OrderFormInput>(() => formFromOrder(order));
+  const [form, setForm] = useState<OrderFormInput>(() => formFromOrder(order, contactOptions, designOptions));
   const [dirty, setDirty] = useState(false);
   const [errors, setErrors] = useState<ActionResult["fieldErrors"]>({});
   const [summary, setSummary] = useState("");

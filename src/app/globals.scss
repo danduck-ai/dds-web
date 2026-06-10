@@ -310,7 +310,7 @@ body {
 
 .order-table {
   width: 100%;
-  min-width: 920px;
+  min-width: 56.25rem;
   table-layout: fixed;
   border-collapse: collapse;
   font-size: 0.875rem;
@@ -332,55 +332,50 @@ body {
     font-weight: 600;
   }
 
-  th:nth-child(1),
-  td:nth-child(1) {
-    width: 3rem;
-  }
-
-  th:nth-child(2),
-  td:nth-child(2) {
-    width: 8rem;
-  }
-
-  th:nth-child(3),
-  td:nth-child(3) {
-    width: 8.5rem;
-  }
-
-  th:nth-child(4),
-  td:nth-child(4) {
-    width: 9rem;
-  }
-
-  th:nth-child(5),
-  td:nth-child(5) {
-    width: 6rem;
-  }
-
-  th:nth-child(6),
-  td:nth-child(6),
-  th:nth-child(7),
-  td:nth-child(7),
-  th:nth-child(8),
-  td:nth-child(8) {
-    width: 6rem;
-  }
 }
 
 .order-table__select {
   text-align: center;
+  width: 2.75rem;
+}
+
+.order-table__order-no {
+  width: 7.5rem;
+}
+
+.order-table__date {
+  width: 7.75rem;
+}
+
+.order-table__customer {
+  width: 8.5rem;
+}
+
+.order-table__contact {
+  width: 6rem;
+}
+
+.order-table__compact {
+  width: 4.5rem;
 }
 
 .order-table__actions {
-  width: 11rem;
+  overflow: visible;
+  text-overflow: clip;
+  width: 10.25rem;
 
   button {
+    min-width: 2.75rem;
     border: 0;
     background: transparent;
     color: #0f62fe;
     padding: 0.25rem;
     font: inherit;
     cursor: pointer;
+  }
+
+  button + button {
+    margin-left: 0.25rem;
   }
 }
 
@@ -454,6 +449,15 @@ body {
     padding: 0 0.75rem;
     font: inherit;
   }
+
+  input[type="radio"],
+  input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    min-height: auto;
+    padding: 0;
+    accent-color: #0f62fe;
+  }
 }
 
 .order-drawer__footer {
@@ -491,6 +495,16 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
+}
+
+.segmented-control label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #c6c6c6;
+  background: #ffffff;
 }
 
 .modal-backdrop {
@@ -657,6 +671,51 @@ body {
 
   .app-shell__sidebar {
     min-height: auto;
+  }
+
+  .app-shell__brand {
+    padding: 0.875rem 1rem;
+  }
+
+  .app-shell__nav {
+    display: flex;
+    overflow-x: auto;
+    padding: 0;
+    border-bottom: 1px solid #393939;
+  }
+
+  .app-shell__nav-link {
+    flex: 0 0 auto;
+    min-height: 2.75rem;
+    min-width: 6.5rem;
+    padding: 0.85rem 1rem;
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+
+    &:hover {
+      border-left-color: transparent;
+      border-bottom-color: #0f62fe;
+    }
+  }
+
+  .app-shell__profile {
+    margin-top: 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.125rem 0.75rem;
+    padding: 0.75rem 1rem;
+
+    strong,
+    span {
+      min-width: 0;
+    }
+  }
+
+  .app-shell__logout {
+    grid-row: 1 / span 3;
+    grid-column: 2;
+    align-self: center;
+    margin-top: 0;
   }
 
   .orders-page {

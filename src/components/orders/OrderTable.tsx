@@ -42,14 +42,14 @@ export function OrderTable({
                 />
               </th>
             ) : null}
-            <th>주문번호</th>
-            <th>주문요청일</th>
-            <th>고객사</th>
-            <th>담당자</th>
-            <th>채널</th>
-            <th>납기</th>
-            <th>상태</th>
-            {canManage ? <th>관리</th> : null}
+            <th className="order-table__order-no">주문번호</th>
+            <th className="order-table__date">주문요청일</th>
+            <th className="order-table__customer">고객사</th>
+            <th className="order-table__contact">담당자</th>
+            <th className="order-table__compact">채널</th>
+            <th className="order-table__compact">납기</th>
+            <th className="order-table__compact">상태</th>
+            {canManage ? <th className="order-table__actions">관리</th> : null}
           </tr>
         </thead>
         <tbody>
@@ -65,13 +65,27 @@ export function OrderTable({
                   />
                 </td>
               ) : null}
-              <td title={row.orderNo}>{row.orderNo}</td>
-              <td title={row.requestedDate}>{row.requestedDate}</td>
-              <td title={row.customerName}>{row.customerName}</td>
-              <td title={row.contactName}>{row.contactName}</td>
-              <td title={row.channel}>{row.channel}</td>
-              <td title={row.deliveryLabel}>{row.deliveryLabel}</td>
-              <td title={row.statusLabel}>{row.statusLabel}</td>
+              <td className="order-table__order-no" title={row.orderNo}>
+                {row.orderNo}
+              </td>
+              <td className="order-table__date" title={row.requestedDate}>
+                {row.requestedDate}
+              </td>
+              <td className="order-table__customer" title={row.customerName}>
+                {row.customerName}
+              </td>
+              <td className="order-table__contact" title={row.contactName}>
+                {row.contactName}
+              </td>
+              <td className="order-table__compact" title={row.channel}>
+                {row.channel}
+              </td>
+              <td className="order-table__compact" title={row.deliveryLabel}>
+                {row.deliveryLabel}
+              </td>
+              <td className="order-table__compact" title={row.statusLabel}>
+                {row.statusLabel}
+              </td>
               {canManage ? (
                 <td className="order-table__actions">
                   <button type="button" onClick={() => onEdit(row)}>

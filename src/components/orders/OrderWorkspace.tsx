@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import type { AppRole, OrderFormInput, OrderListRow, OrderStatus } from "@/features/orders/types";
@@ -43,6 +44,7 @@ export function OrderWorkspace({
   onReleaseOrders: (ids: string[]) => Promise<ActionResult>;
   onCancelOrders: (ids: string[]) => Promise<ActionResult>;
 }) {
+  const router = useRouter();
   const [activeStatus, setActiveStatus] = useState<OrderStatus>(initialStatus);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [drawerState, setDrawerState] = useState<null | { mode: "create" | "edit"; order: OrderListRow | null }>(
@@ -108,6 +110,10 @@ export function OrderWorkspace({
     showToast(result.ok ? "success" : "error", result.message);
     setPendingAction(null);
     setSelectedIds(new Set());
+
+    if (result.ok) {
+      router.refresh();
+    }
   }
 
   return (
@@ -182,6 +188,9 @@ export function OrderWorkspace({
                 ? await onUpdateOrder(drawerState.order.id, input)
                 : await onCreateOrder(input);
             showToast(result.ok ? "success" : "error", result.message);
+            if (result.ok) {
+              router.refresh();
+            }
             return result;
           }}
         />
@@ -193,7 +202,8 @@ export function OrderWorkspace({
           body={`${pendingAction.ids.length}건을 ${
             pendingAction.kind === "release" ? "생산팀에 전달" : "취소"
           }할까요?`}
-          confirmLabel={pendingAction.kind === "release" ? "전달" : "취소"}
+          confirmLabel={pendingAction.kind === "release" ? "전달" : "주문 취소"}
+          cancelLabel="돌아가기"
           onCancel={() => setPendingAction(null)}
           onConfirm={executePendingAction}
         />

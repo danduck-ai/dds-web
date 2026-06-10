@@ -458,6 +458,21 @@ try {
     );
   }
 
+  await db.query(`
+    insert into public.order_number_sequences (sequence_date, last_sequence, updated_at)
+    select
+      to_date(left(order_no, 6), 'YYMMDD') as sequence_date,
+      max(right(order_no, 4)::integer) as last_sequence,
+      now() as updated_at
+    from public.orders
+    where order_no ~ '^[0-9]{6}-[0-9]{4}$'
+    group by to_date(left(order_no, 6), 'YYMMDD')
+    on conflict (sequence_date)
+    do update set
+      last_sequence = greatest(public.order_number_sequences.last_sequence, excluded.last_sequence),
+      updated_at = now()
+  `);
+
   await db.query("commit");
 } catch (error) {
   await db.query("rollback");
