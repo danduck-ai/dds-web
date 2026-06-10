@@ -35,7 +35,7 @@ export default async function OrdersPage({
   ]);
 
   return (
-    <AppShell profile={profile}>
+    <AppShell currentPath="/orders" profile={profile}>
       <OrderWorkspace
         initialOrders={ordersByStatus.flat()}
         initialStatus={initialStatus}

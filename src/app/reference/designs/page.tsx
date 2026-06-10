@@ -21,7 +21,7 @@ export default async function DesignsPage() {
   const rows = await listDesigns();
 
   return (
-    <AppShell profile={profile}>
+    <AppShell currentPath="/reference/designs" profile={profile}>
       <DesignReferenceTable rows={rows} />
     </AppShell>
   );

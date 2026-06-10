@@ -1,3 +1,6 @@
+"use client";
+
+import { SideNavItems, SideNavLink } from "@carbon/react";
 import type { ReactNode } from "react";
 
 import type { AppRole } from "@/features/orders/types";
@@ -29,13 +32,21 @@ const menuByRole: Record<AppRole, Array<{ href: string; label: string }>> = {
   ],
 };
 
+function pathnameOf(value: string) {
+  return value.split("?")[0];
+}
+
 export function AppShell({
   profile,
   children,
+  currentPath,
 }: {
   profile: ShellProfile;
   children: ReactNode;
+  currentPath?: string;
 }) {
+  const currentPathname = currentPath ? pathnameOf(currentPath) : "";
+
   return (
     <div className="app-shell">
       <aside className="app-shell__sidebar" aria-label="주요 메뉴">
@@ -44,11 +55,23 @@ export function AppShell({
           <span>동성실리콘</span>
         </div>
         <nav className="app-shell__nav" aria-label="업무 메뉴">
-          {menuByRole[profile.role].map((item) => (
-            <a className="app-shell__nav-link" href={item.href} key={item.href}>
-              {item.label}
-            </a>
-          ))}
+          <SideNavItems className="app-shell__nav-items" isSideNavExpanded>
+            {menuByRole[profile.role].map((item) => {
+              const isActive = currentPathname === pathnameOf(item.href);
+
+              return (
+                <SideNavLink
+                  aria-current={isActive ? "page" : undefined}
+                  className="app-shell__nav-link"
+                  href={item.href}
+                  isActive={isActive}
+                  key={item.href}
+                >
+                  {item.label}
+                </SideNavLink>
+              );
+            })}
+          </SideNavItems>
         </nav>
         <div className="app-shell__profile">
           <strong>{profile.displayName}</strong>

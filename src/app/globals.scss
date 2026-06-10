@@ -154,6 +154,13 @@ body {
   padding: 0.75rem 0;
 }
 
+.app-shell__nav-items {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .app-shell__nav-link {
   display: block;
   min-height: 2.75rem;
@@ -166,6 +173,13 @@ body {
     background: #262626;
     border-left-color: #0f62fe;
   }
+}
+
+.app-shell__nav-link.cds--side-nav__link--current {
+  background: #262626;
+  border-left-color: #0f62fe;
+  color: #ffffff;
+  font-weight: 600;
 }
 
 .app-shell__profile {
@@ -684,6 +698,10 @@ body {
     border-bottom: 1px solid #393939;
   }
 
+  .app-shell__nav-items {
+    display: flex;
+  }
+
   .app-shell__nav-link {
     flex: 0 0 auto;
     min-height: 2.75rem;
@@ -696,6 +714,11 @@ body {
       border-left-color: transparent;
       border-bottom-color: #0f62fe;
     }
+  }
+
+  .app-shell__nav-link.cds--side-nav__link--current {
+    border-left-color: transparent;
+    border-bottom-color: #0f62fe;
   }
 
   .app-shell__profile {

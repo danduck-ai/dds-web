@@ -21,7 +21,7 @@ export default async function CustomersPage() {
   const rows = await listCustomers();
 
   return (
-    <AppShell profile={profile}>
+    <AppShell currentPath="/reference/customers" profile={profile}>
       <CustomerReferenceTable rows={rows} />
     </AppShell>
   );
