@@ -229,6 +229,85 @@ export async function createOrder(input: OrderFormInput): Promise<OrderActionRes
   return { ok: true, message: "주문이 저장되었습니다." };
 }
 
+export async function updateOrder(orderId: string, input: OrderFormInput): Promise<OrderActionResult> {
+  "use server";
+
+  const profile = await requireAdministrativeProfile();
+  const mutation = buildCreateOrderMutation(input, profile.id);
+
+  if (!mutation.ok) {
+    return {
+      ok: false,
+      message: "입력값을 확인하세요.",
+      fieldErrors: mutation.fieldErrors,
+    };
+  }
+
+  try {
+    await withDbTransaction(async (client) => {
+      const current = await client.query<{ id: string; status: OrderStatus }>(
+        "select id, status from public.orders where id = $1 for update",
+        [orderId],
+      );
+      ensureActiveOrder(current.rows[0]);
+
+      await client.query(
+        `
+          update public.orders
+          set requested_date = $2,
+              channel = $3,
+              customer_id = $4,
+              contact_id = $5,
+              design_id = $6,
+              quantity = $7,
+              delivery_type = $8
+          where id = $1
+        `,
+        [
+          orderId,
+          mutation.order.requested_date,
+          mutation.order.channel,
+          mutation.order.customer_id,
+          mutation.order.contact_id,
+          mutation.order.design_id,
+          mutation.order.quantity,
+          mutation.order.delivery_type,
+        ],
+      );
+
+      await client.query("delete from public.delivery_schedules where order_id = $1", [orderId]);
+
+      for (const schedule of mutation.schedules) {
+        await client.query(
+          `
+            insert into public.delivery_schedules
+              (order_id, scheduled_date, quantity)
+            values ($1, $2, $3)
+          `,
+          [orderId, schedule.scheduled_date, schedule.quantity],
+        );
+      }
+
+      await client.query(
+        `
+          insert into public.order_status_events
+            (order_id, from_status, to_status, changed_by, note)
+          values ($1, 'active', 'active', $2, 'updated from order workspace')
+        `,
+        [orderId, profile.id],
+      );
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "주문 수정에 실패했습니다.",
+    };
+  }
+
+  revalidatePath("/orders");
+  return { ok: true, message: "주문이 수정되었습니다." };
+}
+
 export async function releaseOrders(orderIds: string[]): Promise<OrderActionResult> {
   "use server";
 

@@ -49,6 +49,22 @@ export type CustomerTableRow = {
   contactSummary: string;
 };
 
+export type ContactOption = {
+  value: string;
+  customerId: string;
+  contactId: string;
+  label: string;
+};
+
+export type DesignOption = {
+  value: string;
+  label: string;
+  designNo: string;
+  productName: string;
+  specification: string;
+  departmentCode: "R" | "S" | "P";
+};
+
 export function mapDesignRows(rows: DesignRow[]): DesignTableRow[] {
   return rows.map((row) => ({
     id: row.id,
@@ -136,4 +152,62 @@ export async function listCustomers() {
   }
 
   return mapCustomerRows(customers ?? [], mapContacts(contacts ?? []));
+}
+
+export async function listOrderFormLookups() {
+  const supabase = await createClient();
+  const [
+    { data: customers, error: customersError },
+    { data: contacts, error: contactsError },
+    { data: designs, error: designsError },
+  ] = await Promise.all([
+    supabase
+      .from("customers")
+      .select("id,name,business_registration_no,identifier")
+      .eq("is_active", true)
+      .order("name")
+      .returns<CustomerRow[]>(),
+    supabase
+      .from("customer_contacts")
+      .select("id,customer_id,name,phone,email,position")
+      .eq("is_active", true)
+      .order("name")
+      .returns<ContactRow[]>(),
+    supabase
+      .from("designs")
+      .select("id,design_no,product_name,specification,department_code")
+      .eq("is_active", true)
+      .order("design_no")
+      .returns<DesignRow[]>(),
+  ]);
+
+  if (customersError) {
+    throw new Error(customersError.message);
+  }
+  if (contactsError) {
+    throw new Error(contactsError.message);
+  }
+  if (designsError) {
+    throw new Error(designsError.message);
+  }
+
+  const customerNameById = new Map((customers ?? []).map((customer) => [customer.id, customer.name]));
+
+  const contactOptions: ContactOption[] = (contacts ?? []).map((contact) => ({
+    value: `${contact.customer_id}::${contact.id}`,
+    customerId: contact.customer_id,
+    contactId: contact.id,
+    label: `${customerNameById.get(contact.customer_id) ?? "-"} / ${contact.name}`,
+  }));
+
+  const designOptions: DesignOption[] = mapDesignRows(designs ?? []).map((design) => ({
+    value: design.id,
+    label: `${design.designNo} / ${design.productName} / ${design.specification}`,
+    designNo: design.designNo,
+    productName: design.productName,
+    specification: design.specification,
+    departmentCode: design.departmentCode,
+  }));
+
+  return { contactOptions, designOptions };
 }
