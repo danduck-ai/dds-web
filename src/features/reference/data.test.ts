@@ -12,6 +12,7 @@ describe("reference row mapping", () => {
           product_name: "실리콘 패킹 R",
           specification: "R-100 / 5T",
           department_code: "R",
+          default_units_per_hour: 120,
         },
       ]),
     ).toEqual([
@@ -21,6 +22,7 @@ describe("reference row mapping", () => {
         productName: "실리콘 패킹 R",
         specification: "R-100 / 5T",
         departmentCode: "R",
+        defaultUnitsPerHour: 120,
       },
     ]);
   });

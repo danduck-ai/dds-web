@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import mockData from "@/features/mock-data/dss.json";
 
 export type DesignRow = {
   id: string;
@@ -6,6 +6,7 @@ export type DesignRow = {
   product_name: string;
   specification: string;
   department_code: "R" | "S" | "P";
+  default_units_per_hour?: number;
 };
 
 export type DesignTableRow = {
@@ -14,6 +15,7 @@ export type DesignTableRow = {
   productName: string;
   specification: string;
   departmentCode: "R" | "S" | "P";
+  defaultUnitsPerHour: number;
 };
 
 export type CustomerRow = {
@@ -21,6 +23,7 @@ export type CustomerRow = {
   name: string;
   business_registration_no: string | null;
   identifier: string | null;
+  ticker?: string | null;
 };
 
 export type ContactRow = {
@@ -53,6 +56,7 @@ export type ContactOption = {
   value: string;
   customerId: string;
   contactId: string;
+  customerTicker: string;
   label: string;
 };
 
@@ -63,7 +67,15 @@ export type DesignOption = {
   productName: string;
   specification: string;
   departmentCode: "R" | "S" | "P";
+  defaultUnitsPerHour: number;
 };
+
+function fallbackCustomerTicker(customer: Pick<CustomerRow, "identifier" | "name" | "id">) {
+  const source = customer.identifier || customer.name || customer.id;
+  const ticker = source.replace(/[^a-z0-9]/gi, "").toUpperCase();
+
+  return ticker || "CUSTOMER";
+}
 
 export function mapDesignRows(rows: DesignRow[]): DesignTableRow[] {
   return rows.map((row) => ({
@@ -72,6 +84,7 @@ export function mapDesignRows(rows: DesignRow[]): DesignTableRow[] {
     productName: row.product_name,
     specification: row.specification,
     departmentCode: row.department_code,
+    defaultUnitsPerHour: row.default_units_per_hour ?? 60,
   }));
 }
 
@@ -110,103 +123,59 @@ export function mapCustomerRows(
 }
 
 export async function listDesigns() {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("designs")
-    .select("id,design_no,product_name,specification,department_code")
-    .eq("is_active", true)
-    .order("design_no")
-    .returns<DesignRow[]>();
+  const rows = mockData.designs
+    .filter((design) => design.is_active)
+    .sort((left, right) => left.design_no.localeCompare(right.design_no));
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return mapDesignRows(data ?? []);
+  return mapDesignRows(rows as DesignRow[]);
 }
 
 export async function listCustomers() {
-  const supabase = await createClient();
-  const [{ data: customers, error: customersError }, { data: contacts, error: contactsError }] =
-    await Promise.all([
-      supabase
-        .from("customers")
-        .select("id,name,business_registration_no,identifier")
-        .eq("is_active", true)
-        .order("name")
-        .returns<CustomerRow[]>(),
-      supabase
-        .from("customer_contacts")
-        .select("id,customer_id,name,phone,email,position")
-        .eq("is_active", true)
-        .order("name")
-        .returns<ContactRow[]>(),
-    ]);
+  const customers = mockData.customers
+    .filter((customer) => customer.is_active)
+    .sort((left, right) => left.name.localeCompare(right.name));
+  const contacts = mockData.contacts
+    .filter((contact) => contact.is_active)
+    .sort((left, right) => left.name.localeCompare(right.name));
 
-  if (customersError) {
-    throw new Error(customersError.message);
-  }
-
-  if (contactsError) {
-    throw new Error(contactsError.message);
-  }
-
-  return mapCustomerRows(customers ?? [], mapContacts(contacts ?? []));
+  return mapCustomerRows(customers, mapContacts(contacts));
 }
 
 export async function listOrderFormLookups() {
-  const supabase = await createClient();
-  const [
-    { data: customers, error: customersError },
-    { data: contacts, error: contactsError },
-    { data: designs, error: designsError },
-  ] = await Promise.all([
-    supabase
-      .from("customers")
-      .select("id,name,business_registration_no,identifier")
-      .eq("is_active", true)
-      .order("name")
-      .returns<CustomerRow[]>(),
-    supabase
-      .from("customer_contacts")
-      .select("id,customer_id,name,phone,email,position")
-      .eq("is_active", true)
-      .order("name")
-      .returns<ContactRow[]>(),
-    supabase
-      .from("designs")
-      .select("id,design_no,product_name,specification,department_code")
-      .eq("is_active", true)
-      .order("design_no")
-      .returns<DesignRow[]>(),
-  ]);
+  const customers = mockData.customers
+    .filter((customer) => customer.is_active)
+    .sort((left, right) => left.name.localeCompare(right.name));
+  const contacts = mockData.contacts
+    .filter((contact) => contact.is_active)
+    .sort((left, right) => left.name.localeCompare(right.name));
+  const designs = mockData.designs
+    .filter((design) => design.is_active)
+    .sort((left, right) => left.design_no.localeCompare(right.design_no)) as DesignRow[];
 
-  if (customersError) {
-    throw new Error(customersError.message);
-  }
-  if (contactsError) {
-    throw new Error(contactsError.message);
-  }
-  if (designsError) {
-    throw new Error(designsError.message);
-  }
+  const customerNameById = new Map(customers.map((customer) => [customer.id, customer.name]));
+  const customerTickerById = new Map(
+    customers.map((customer) => [
+      customer.id,
+      (customer.ticker || fallbackCustomerTicker(customer)).replace(/[^a-z0-9]/gi, "").toUpperCase(),
+    ]),
+  );
 
-  const customerNameById = new Map((customers ?? []).map((customer) => [customer.id, customer.name]));
-
-  const contactOptions: ContactOption[] = (contacts ?? []).map((contact) => ({
+  const contactOptions: ContactOption[] = contacts.map((contact) => ({
     value: `${contact.customer_id}::${contact.id}`,
     customerId: contact.customer_id,
     contactId: contact.id,
+    customerTicker: customerTickerById.get(contact.customer_id) ?? "CUSTOMER",
     label: `${customerNameById.get(contact.customer_id) ?? "-"} / ${contact.name}`,
   }));
 
-  const designOptions: DesignOption[] = mapDesignRows(designs ?? []).map((design) => ({
+  const designOptions: DesignOption[] = mapDesignRows(designs).map((design) => ({
     value: design.id,
     label: `${design.designNo} / ${design.productName} / ${design.specification}`,
     designNo: design.designNo,
     productName: design.productName,
     specification: design.specification,
     departmentCode: design.departmentCode,
+    defaultUnitsPerHour: design.defaultUnitsPerHour,
   }));
 
   return { contactOptions, designOptions };

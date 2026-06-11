@@ -2,31 +2,35 @@ import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/app-shell/AppShell";
 import { OrderWorkspace } from "@/components/orders/OrderWorkspace";
-import { listOrderStatusRows } from "@/features/orders/data";
+import { listOrders } from "@/features/orders/data";
+import { listOrderFormLookups } from "@/features/reference/data";
 import { getCurrentProfile } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
-export default async function OrdersPage() {
+export default async function OrderIntakePage() {
   const profile = await getCurrentProfile();
 
   if (!profile) {
     redirect("/login");
   }
 
-  const orders = await listOrderStatusRows();
+  if (profile.role !== "A") {
+    redirect("/orders");
+  }
+
+  const [orders, lookups] = await Promise.all([listOrders("active"), listOrderFormLookups()]);
 
   return (
-    <AppShell currentPath="/orders" profile={profile}>
+    <AppShell currentPath="/orders/intake" profile={profile}>
       <OrderWorkspace
         initialOrders={orders}
         initialStatus="active"
-        mode="status"
+        mode="intake"
         role={profile.role}
         receiverLabel={`${profile.displayName} / ${profile.email}`}
-        contactOptions={[]}
-        currentDate={new Date().toISOString()}
-        designOptions={[]}
+        contactOptions={lookups.contactOptions}
+        designOptions={lookups.designOptions}
       />
     </AppShell>
   );

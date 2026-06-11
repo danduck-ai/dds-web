@@ -1,5 +1,5 @@
 import type { AppRole } from "@/features/orders/types";
-import { createClient } from "@/lib/supabase/server";
+import mockData from "@/features/mock-data/dss.json";
 
 export type CurrentProfile = {
   id: string;
@@ -16,22 +16,11 @@ type ProfileRow = {
 };
 
 export async function getCurrentProfile(): Promise<CurrentProfile | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const data = mockData.profiles.find((profile) => profile.role === "A" && profile.is_active) as
+    | ProfileRow
+    | undefined;
 
-  if (!user) {
-    return null;
-  }
-
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id,email,display_name,role")
-    .eq("id", user.id)
-    .maybeSingle<ProfileRow>();
-
-  if (error || !data) {
+  if (!data) {
     return null;
   }
 

@@ -14,56 +14,76 @@ const baseOrder: OrderFormInput = {
   customChannel: "",
   customerId: "customer-1",
   contactId: "contact-1",
-  designId: "design-1",
-  quantity: 500,
-  deliveryType: "single",
-  schedules: [{ scheduledDate: "2026-06-18", quantity: 500 }],
+  products: [
+    {
+      designId: "design-1",
+      quantity: 500,
+      shipmentPlans: [{ plannedShipDate: "2026-06-18", quantity: 500 }],
+    },
+  ],
 };
 
 describe("validateOrderForm", () => {
-  test("accepts a single delivery schedule that matches the order quantity", () => {
+  test("accepts product-level shipment plans that match each product quantity", () => {
     const result = validateOrderForm(baseOrder);
 
     expect(result.ok).toBe(true);
     expect(result.fieldErrors).toEqual({});
   });
 
-  test("rejects single delivery when the schedule quantity does not match the order quantity", () => {
+  test("accepts multiple products with independent shipment plan totals", () => {
     const result = validateOrderForm({
       ...baseOrder,
-      schedules: [{ scheduledDate: "2026-06-18", quantity: 300 }],
+      products: [
+        ...baseOrder.products,
+        {
+          designId: "design-2",
+          quantity: 200,
+          shipmentPlans: [
+            { plannedShipDate: "2026-06-20", quantity: 120 },
+            { plannedShipDate: "2026-06-27", quantity: 80 },
+          ],
+        },
+      ],
     });
 
-    expect(result.ok).toBe(false);
-    expect(result.fieldErrors.schedules).toContain("납기 수량 합계");
+    expect(result.ok).toBe(true);
   });
 
-  test("rejects split delivery when a row is missing date or quantity", () => {
+  test("rejects a product when shipment plan quantity differs from product quantity", () => {
     const result = validateOrderForm({
       ...baseOrder,
-      deliveryType: "split",
-      schedules: [
-        { scheduledDate: "2026-06-18", quantity: 300 },
-        { scheduledDate: "", quantity: 200 },
+      products: [
+        {
+          designId: "design-1",
+          quantity: 500,
+          shipmentPlans: [{ plannedShipDate: "2026-06-18", quantity: 300 }],
+        },
       ],
     });
 
     expect(result.ok).toBe(false);
-    expect(result.fieldErrors.schedules).toContain("모든 분할 출하 행");
+    expect(result.fieldErrors.products).toContain("제품 1");
+    expect(result.fieldErrors.products).toContain("출하계획 수량 합계");
   });
 
-  test("rejects split delivery when total quantity differs from order quantity", () => {
+  test("rejects shipment plan rows missing a date or quantity", () => {
     const result = validateOrderForm({
       ...baseOrder,
-      deliveryType: "split",
-      schedules: [
-        { scheduledDate: "2026-06-18", quantity: 300 },
-        { scheduledDate: "2026-06-25", quantity: 100 },
+      products: [
+        {
+          designId: "design-1",
+          quantity: 500,
+          shipmentPlans: [
+            { plannedShipDate: "2026-06-18", quantity: 300 },
+            { plannedShipDate: "", quantity: 200 },
+          ],
+        },
       ],
     });
 
     expect(result.ok).toBe(false);
-    expect(result.fieldErrors.schedules).toContain("납기 수량 합계");
+    expect(result.fieldErrors.products).toContain("모든 출하계획 행");
   });
 
   test("requires custom channel text when channel is 기타", () => {

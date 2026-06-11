@@ -1,7 +1,19 @@
 "use client";
 
-import { SideNavItems, SideNavLink } from "@carbon/react";
+import {
+  Button,
+  Content,
+  Header,
+  HeaderMenuButton,
+  HeaderName,
+  SideNav,
+  SideNavItems,
+  SideNavLink,
+  Stack,
+} from "@carbon/react";
+import { DocumentAdd, ListChecked, Logout, Product, UserMultiple } from "@carbon/icons-react";
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 
 import type { AppRole } from "@/features/orders/types";
 import { signOut } from "@/lib/auth/actions";
@@ -18,17 +30,24 @@ const roleLabels: Record<AppRole, string> = {
   E: "임원",
 };
 
-const menuByRole: Record<AppRole, Array<{ href: string; label: string }>> = {
+type MenuItem = {
+  href: string;
+  label: string;
+  icon: typeof ListChecked;
+};
+
+const menuByRole: Record<AppRole, MenuItem[]> = {
   A: [
-    { href: "/orders", label: "주문 현황" },
-    { href: "/reference/designs", label: "설계 관리" },
-    { href: "/reference/customers", label: "고객 관리" },
+    { href: "/orders/intake", label: "주문 접수", icon: DocumentAdd },
+    { href: "/orders", label: "주문 현황", icon: ListChecked },
+    { href: "/reference/designs", label: "설계 관리", icon: Product },
+    { href: "/reference/customers", label: "고객 관리", icon: UserMultiple },
   ],
-  P: [{ href: "/orders?status=released", label: "주문 현황" }],
+  P: [{ href: "/orders", label: "주문 현황", icon: ListChecked }],
   E: [
-    { href: "/orders", label: "주문 현황" },
-    { href: "/reference/designs", label: "설계 관리" },
-    { href: "/reference/customers", label: "고객 관리" },
+    { href: "/orders", label: "주문 현황", icon: ListChecked },
+    { href: "/reference/designs", label: "설계 관리", icon: Product },
+    { href: "/reference/customers", label: "고객 관리", icon: UserMultiple },
   ],
 };
 
@@ -46,45 +65,88 @@ export function AppShell({
   currentPath?: string;
 }) {
   const currentPathname = currentPath ? pathnameOf(currentPath) : "";
+  const homeHref = menuByRole[profile.role][0]?.href ?? "/orders";
+  const [isSideNavExpanded, setIsSideNavExpanded] = useState(true);
+  const [isLargeViewport, setIsLargeViewport] = useState(true);
+  const isSideNavRail = !isSideNavExpanded && isLargeViewport;
+
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 1056px)");
+    const syncSideNav = () => {
+      setIsLargeViewport(query.matches);
+      setIsSideNavExpanded(query.matches);
+    };
+
+    syncSideNav();
+    query.addEventListener("change", syncSideNav);
+    return () => query.removeEventListener("change", syncSideNav);
+  }, []);
 
   return (
-    <div className="app-shell">
-      <aside className="app-shell__sidebar" aria-label="주요 메뉴">
-        <div className="app-shell__brand">
-          <strong>DSS</strong>
-          <span>동성실리콘</span>
-        </div>
-        <nav className="app-shell__nav" aria-label="업무 메뉴">
-          <SideNavItems className="app-shell__nav-items" isSideNavExpanded>
-            {menuByRole[profile.role].map((item) => {
-              const isActive = currentPathname === pathnameOf(item.href);
+    <>
+      <Header aria-label="동성실리콘 주문관리">
+        <HeaderMenuButton
+          aria-controls="dss-side-nav"
+          aria-expanded={isSideNavExpanded}
+          aria-label={isSideNavExpanded ? "메뉴 닫기" : "메뉴 열기"}
+          isActive={isSideNavExpanded}
+          isCollapsible
+          onClick={() => setIsSideNavExpanded((current) => !current)}
+        />
+        <HeaderName href={homeHref} prefix="DSS">
+          동성실리콘
+        </HeaderName>
+      </Header>
 
-              return (
-                <SideNavLink
-                  aria-current={isActive ? "page" : undefined}
-                  className="app-shell__nav-link"
-                  href={item.href}
-                  isActive={isActive}
-                  key={item.href}
-                >
-                  {item.label}
-                </SideNavLink>
-              );
-            })}
-          </SideNavItems>
-        </nav>
-        <div className="app-shell__profile">
-          <strong>{profile.displayName}</strong>
-          <span>{roleLabels[profile.role]}</span>
-          <span>{profile.email}</span>
-          <form action={signOut}>
-            <button className="app-shell__logout" type="submit">
-              로그아웃
-            </button>
-          </form>
+      <SideNav
+        aria-label="업무 메뉴"
+        expanded={isSideNavExpanded}
+        id="dss-side-nav"
+        isFixedNav
+        isPersistent
+        isRail={isSideNavRail}
+      >
+        <SideNavItems isSideNavExpanded={isSideNavExpanded}>
+          {menuByRole[profile.role].map((item) => {
+            const isActive = currentPathname === pathnameOf(item.href);
+
+            return (
+              <SideNavLink
+                aria-current={isActive ? "page" : undefined}
+                href={item.href}
+                isActive={isActive}
+                isSideNavExpanded={isSideNavExpanded}
+                key={item.href}
+                renderIcon={item.icon}
+              >
+                {item.label}
+              </SideNavLink>
+            );
+          })}
+        </SideNavItems>
+
+        <div aria-label="사용자 정보" className="dss-shell-profile">
+          <Stack gap={2}>
+            <strong>{profile.displayName}</strong>
+            <span>{roleLabels[profile.role]}</span>
+            <span>{profile.email}</span>
+            <form action={signOut}>
+              <Button kind="ghost" renderIcon={Logout} size="sm" type="submit">
+                로그아웃
+              </Button>
+            </form>
+          </Stack>
         </div>
-      </aside>
-      <div className="app-shell__content">{children}</div>
-    </div>
+      </SideNav>
+
+      <Content
+        className="dss-shell-content"
+        data-side-nav-expanded={isSideNavExpanded}
+        data-side-nav-rail={isSideNavRail}
+        tagName="div"
+      >
+        {children}
+      </Content>
+    </>
   );
 }

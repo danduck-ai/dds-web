@@ -15,7 +15,7 @@ export default async function DesignsPage() {
   }
 
   if (profile.role === "P") {
-    redirect("/orders?status=released");
+    redirect("/orders");
   }
 
   const rows = await listDesigns();

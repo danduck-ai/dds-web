@@ -1,0 +1,731 @@
+{
+  "profiles": [
+    {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "email": "admin@dss.local",
+      "display_name": "김민정",
+      "role": "A",
+      "is_active": true
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000002",
+      "email": "production@dss.local",
+      "display_name": "박현우",
+      "role": "P",
+      "is_active": true
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000003",
+      "email": "executive@dss.local",
+      "display_name": "이서연",
+      "role": "E",
+      "is_active": true
+    }
+  ],
+  "customers": [
+    {
+      "id": "20000000-0000-4000-8000-000000000001",
+      "name": "동성전자",
+      "ticker": "DSE",
+      "business_registration_no": "101-81-00001",
+      "identifier": "DS-ELEC",
+      "is_active": true
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000002",
+      "name": "한빛산업",
+      "ticker": "HBIND",
+      "business_registration_no": "101-81-00002",
+      "identifier": "HB-IND",
+      "is_active": true
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000003",
+      "name": "세림테크",
+      "ticker": "SRTECH",
+      "business_registration_no": "101-81-00003",
+      "identifier": "SR-TECH",
+      "is_active": true
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000004",
+      "name": "태원모빌리티",
+      "ticker": "TWMOB",
+      "business_registration_no": "101-81-00004",
+      "identifier": "TW-MOB",
+      "is_active": true
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000005",
+      "name": "우진메디칼",
+      "ticker": "WJMED",
+      "business_registration_no": "101-81-00005",
+      "identifier": "WJ-MED",
+      "is_active": true
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000006",
+      "name": "코리아오토씰",
+      "ticker": "KOSEAL",
+      "business_registration_no": "101-81-00006",
+      "identifier": "KO-SEAL",
+      "is_active": true
+    },
+    {
+      "id": "20000000-0000-4000-8000-000000000007",
+      "name": "미래정밀",
+      "ticker": "MRPREC",
+      "business_registration_no": "101-81-00007",
+      "identifier": "MR-PREC",
+      "is_active": false
+    }
+  ],
+  "contacts": [
+    {
+      "id": "21000000-0000-4000-8000-000000000001",
+      "customer_id": "20000000-0000-4000-8000-000000000001",
+      "name": "김영수",
+      "phone": "010-1000-1001",
+      "email": "youngsoo@example.com",
+      "position": "구매팀장",
+      "is_active": true
+    },
+    {
+      "id": "21000000-0000-4000-8000-000000000002",
+      "customer_id": "20000000-0000-4000-8000-000000000001",
+      "name": "오민서",
+      "phone": "010-1000-1004",
+      "email": "minseo@example.com",
+      "position": "품질담당",
+      "is_active": true
+    },
+    {
+      "id": "21000000-0000-4000-8000-000000000003",
+      "customer_id": "20000000-0000-4000-8000-000000000002",
+      "name": "박지현",
+      "phone": "010-1000-1002",
+      "email": "jihyun@example.com",
+      "position": "생산관리",
+      "is_active": true
+    },
+    {
+      "id": "21000000-0000-4000-8000-000000000004",
+      "customer_id": "20000000-0000-4000-8000-000000000002",
+      "name": "최유나",
+      "phone": "010-1000-1005",
+      "email": "yuna@example.com",
+      "position": "구매담당",
+      "is_active": true
+    },
+    {
+      "id": "21000000-0000-4000-8000-000000000005",
+      "customer_id": "20000000-0000-4000-8000-000000000003",
+      "name": "이준호",
+      "phone": "010-1000-1003",
+      "email": "junho@example.com",
+      "position": "구매담당",
+      "is_active": true
+    },
+    {
+      "id": "21000000-0000-4000-8000-000000000006",
+      "customer_id": "20000000-0000-4000-8000-000000000004",
+      "name": "정다은",
+      "phone": "010-1000-1006",
+      "email": "daeun@example.com",
+      "position": "SCM 매니저",
+      "is_active": true
+    },
+    {
+      "id": "21000000-0000-4000-8000-000000000007",
+      "customer_id": "20000000-0000-4000-8000-000000000005",
+      "name": "한도윤",
+      "phone": "010-1000-1007",
+      "email": "doyoon@example.com",
+      "position": "구매파트장",
+      "is_active": true
+    },
+    {
+      "id": "21000000-0000-4000-8000-000000000008",
+      "customer_id": "20000000-0000-4000-8000-000000000006",
+      "name": "문서진",
+      "phone": "010-1000-1008",
+      "email": "seojin@example.com",
+      "position": "개발구매",
+      "is_active": true
+    },
+    {
+      "id": "21000000-0000-4000-8000-000000000009",
+      "customer_id": "20000000-0000-4000-8000-000000000006",
+      "name": "조해린",
+      "phone": "010-1000-1009",
+      "email": "haerin@example.com",
+      "position": "납기관리",
+      "is_active": true
+    },
+    {
+      "id": "21000000-0000-4000-8000-000000000010",
+      "customer_id": "20000000-0000-4000-8000-000000000007",
+      "name": "윤태경",
+      "phone": "010-1000-1010",
+      "email": "taekyung@example.com",
+      "position": "이전 담당자",
+      "is_active": false
+    }
+  ],
+  "designs": [
+    {
+      "id": "30000000-0000-4000-8000-000000000001",
+      "design_no": "DS-1042",
+      "product_name": "실리콘 패킹 R",
+      "specification": "R-100 / 5T",
+      "department_code": "R",
+      "default_units_per_hour": 120,
+      "is_active": true
+    },
+    {
+      "id": "30000000-0000-4000-8000-000000000002",
+      "design_no": "DS-2050",
+      "product_name": "실리콘 튜브 S",
+      "specification": "S-20 / 투명",
+      "department_code": "S",
+      "default_units_per_hour": 80,
+      "is_active": true
+    },
+    {
+      "id": "30000000-0000-4000-8000-000000000003",
+      "design_no": "DS-3301",
+      "product_name": "실리콘 몰드 P",
+      "specification": "P-300 / 흑색",
+      "department_code": "P",
+      "default_units_per_hour": 45,
+      "is_active": true
+    },
+    {
+      "id": "30000000-0000-4000-8000-000000000004",
+      "design_no": "DS-4110",
+      "product_name": "방진 고무 패드 R",
+      "specification": "R-45 / 10T / 난연",
+      "department_code": "R",
+      "default_units_per_hour": 100,
+      "is_active": true
+    },
+    {
+      "id": "30000000-0000-4000-8000-000000000005",
+      "design_no": "DS-5124",
+      "product_name": "의료용 실리콘 캡 S",
+      "specification": "S-8 / 백색 / 멸균포장",
+      "department_code": "S",
+      "default_units_per_hour": 90,
+      "is_active": true
+    },
+    {
+      "id": "30000000-0000-4000-8000-000000000006",
+      "design_no": "DS-6208",
+      "product_name": "정밀 오링 P",
+      "specification": "P-18 / 내열 220C",
+      "department_code": "P",
+      "default_units_per_hour": 70,
+      "is_active": true
+    },
+    {
+      "id": "30000000-0000-4000-8000-000000000007",
+      "design_no": "DS-7155",
+      "product_name": "자동차 씰 R",
+      "specification": "R-220 / 회색 / EPDM",
+      "department_code": "R",
+      "default_units_per_hour": 110,
+      "is_active": true
+    },
+    {
+      "id": "30000000-0000-4000-8000-000000000008",
+      "design_no": "DS-8022",
+      "product_name": "압출 실리콘 가스켓 S",
+      "specification": "S-120 / 적색 / 연속압출",
+      "department_code": "S",
+      "default_units_per_hour": 65,
+      "is_active": true
+    },
+    {
+      "id": "30000000-0000-4000-8000-000000000009",
+      "design_no": "DS-9107",
+      "product_name": "고정밀 몰딩 부품 P",
+      "specification": "P-75 / 저압축영구변형",
+      "department_code": "P",
+      "default_units_per_hour": 55,
+      "is_active": true
+    },
+    {
+      "id": "30000000-0000-4000-8000-000000000010",
+      "design_no": "DS-9900",
+      "product_name": "구형 테스트 샘플",
+      "specification": "ARCHIVED",
+      "department_code": "R",
+      "default_units_per_hour": 60,
+      "is_active": false
+    }
+  ],
+  "orders": [
+    {
+      "id": "40000000-0000-4000-8000-000000000001",
+      "order_no": "O-DSE-26061100005",
+      "status": "active",
+      "requested_date": "2026-06-11",
+      "channel": "카톡",
+      "customer_id": "20000000-0000-4000-8000-000000000001",
+      "contact_id": "21000000-0000-4000-8000-000000000001",
+      "design_id": "30000000-0000-4000-8000-000000000004",
+      "quantity": 240,
+      "delivery_type": "single",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-11T07:40:00.000Z",
+      "completed_at": null
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000002",
+      "order_no": "O-TWMOB-26061100004",
+      "status": "active",
+      "requested_date": "2026-06-11",
+      "channel": "이메일",
+      "customer_id": "20000000-0000-4000-8000-000000000004",
+      "contact_id": "21000000-0000-4000-8000-000000000006",
+      "design_id": "30000000-0000-4000-8000-000000000007",
+      "quantity": 900,
+      "delivery_type": "split",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-11T06:55:00.000Z",
+      "completed_at": null
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000003",
+      "order_no": "O-WJMED-26061100003",
+      "status": "active",
+      "requested_date": "2026-06-11",
+      "channel": "전화",
+      "customer_id": "20000000-0000-4000-8000-000000000005",
+      "contact_id": "21000000-0000-4000-8000-000000000007",
+      "design_id": "30000000-0000-4000-8000-000000000005",
+      "quantity": 1200,
+      "delivery_type": "single",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-11T05:30:00.000Z",
+      "completed_at": null
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000004",
+      "order_no": "O-HBIND-26061100002",
+      "status": "active",
+      "requested_date": "2026-06-11",
+      "channel": "방문",
+      "customer_id": "20000000-0000-4000-8000-000000000002",
+      "contact_id": "21000000-0000-4000-8000-000000000004",
+      "design_id": "30000000-0000-4000-8000-000000000002",
+      "quantity": 450,
+      "delivery_type": "split",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-11T04:10:00.000Z",
+      "completed_at": null
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000005",
+      "order_no": "O-KOSEAL-26061000009",
+      "status": "active",
+      "requested_date": "2026-06-10",
+      "channel": "기타: 긴급 메모",
+      "customer_id": "20000000-0000-4000-8000-000000000006",
+      "contact_id": "21000000-0000-4000-8000-000000000008",
+      "design_id": "30000000-0000-4000-8000-000000000009",
+      "quantity": 60,
+      "delivery_type": "single",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-10T08:25:00.000Z",
+      "completed_at": null
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000006",
+      "order_no": "O-SRTECH-26061000008",
+      "status": "released",
+      "requested_date": "2026-06-10",
+      "channel": "전화",
+      "customer_id": "20000000-0000-4000-8000-000000000003",
+      "contact_id": "21000000-0000-4000-8000-000000000005",
+      "design_id": "30000000-0000-4000-8000-000000000003",
+      "quantity": 120,
+      "delivery_type": "single",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-10T07:20:00.000Z",
+      "completed_at": null
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000007",
+      "order_no": "O-DSE-26061000007",
+      "status": "released",
+      "requested_date": "2026-06-10",
+      "channel": "카톡",
+      "customer_id": "20000000-0000-4000-8000-000000000001",
+      "contact_id": "21000000-0000-4000-8000-000000000002",
+      "design_id": "30000000-0000-4000-8000-000000000001",
+      "quantity": 500,
+      "delivery_type": "split",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-10T06:35:00.000Z",
+      "completed_at": null
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000008",
+      "order_no": "O-HBIND-26060900006",
+      "status": "released",
+      "requested_date": "2026-06-09",
+      "channel": "이메일",
+      "customer_id": "20000000-0000-4000-8000-000000000002",
+      "contact_id": "21000000-0000-4000-8000-000000000003",
+      "design_id": "30000000-0000-4000-8000-000000000006",
+      "quantity": 720,
+      "delivery_type": "single",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-09T05:40:00.000Z",
+      "completed_at": null
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000009",
+      "order_no": "O-TWMOB-26060900005",
+      "status": "released",
+      "requested_date": "2026-06-09",
+      "channel": "기타: 고객 포털",
+      "customer_id": "20000000-0000-4000-8000-000000000004",
+      "contact_id": "21000000-0000-4000-8000-000000000006",
+      "design_id": "30000000-0000-4000-8000-000000000008",
+      "quantity": 1000,
+      "delivery_type": "split",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-09T04:15:00.000Z",
+      "completed_at": null
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000010",
+      "order_no": "O-WJMED-26060800004",
+      "status": "completed",
+      "requested_date": "2026-06-08",
+      "channel": "이메일",
+      "customer_id": "20000000-0000-4000-8000-000000000005",
+      "contact_id": "21000000-0000-4000-8000-000000000007",
+      "design_id": "30000000-0000-4000-8000-000000000005",
+      "quantity": 300,
+      "delivery_type": "single",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-08T07:00:00.000Z",
+      "completed_at": "2026-06-10T07:40:00.000Z"
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000011",
+      "order_no": "O-KOSEAL-26060800003",
+      "status": "completed",
+      "requested_date": "2026-06-08",
+      "channel": "전화",
+      "customer_id": "20000000-0000-4000-8000-000000000006",
+      "contact_id": "21000000-0000-4000-8000-000000000009",
+      "design_id": "30000000-0000-4000-8000-000000000007",
+      "quantity": 750,
+      "delivery_type": "split",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-08T06:20:00.000Z",
+      "completed_at": "2026-06-09T08:30:00.000Z"
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000012",
+      "order_no": "O-DSE-26060700002",
+      "status": "completed",
+      "requested_date": "2026-06-07",
+      "channel": "방문",
+      "customer_id": "20000000-0000-4000-8000-000000000001",
+      "contact_id": "21000000-0000-4000-8000-000000000001",
+      "design_id": "30000000-0000-4000-8000-000000000001",
+      "quantity": 180,
+      "delivery_type": "single",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-07T03:45:00.000Z",
+      "completed_at": "2026-06-07T08:15:00.000Z"
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000013",
+      "order_no": "O-SRTECH-26060700001",
+      "status": "completed",
+      "requested_date": "2026-06-07",
+      "channel": "카톡",
+      "customer_id": "20000000-0000-4000-8000-000000000003",
+      "contact_id": "21000000-0000-4000-8000-000000000005",
+      "design_id": "30000000-0000-4000-8000-000000000009",
+      "quantity": 420,
+      "delivery_type": "split",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-07T02:30:00.000Z",
+      "completed_at": "2026-06-07T09:20:00.000Z"
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000014",
+      "order_no": "O-DSE-26060600002",
+      "status": "cancelled",
+      "requested_date": "2026-06-06",
+      "channel": "기타: 팩스",
+      "customer_id": "20000000-0000-4000-8000-000000000001",
+      "contact_id": "21000000-0000-4000-8000-000000000001",
+      "design_id": "30000000-0000-4000-8000-000000000003",
+      "quantity": 80,
+      "delivery_type": "single",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-06T06:10:00.000Z",
+      "completed_at": null
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000015",
+      "order_no": "O-WJMED-26060600001",
+      "status": "cancelled",
+      "requested_date": "2026-06-06",
+      "channel": "이메일",
+      "customer_id": "20000000-0000-4000-8000-000000000005",
+      "contact_id": "21000000-0000-4000-8000-000000000007",
+      "design_id": "30000000-0000-4000-8000-000000000006",
+      "quantity": 160,
+      "delivery_type": "split",
+      "received_by": "10000000-0000-4000-8000-000000000001",
+      "created_at": "2026-06-06T05:20:00.000Z",
+      "completed_at": null
+    }
+  ],
+  "delivery_schedules": [
+    {
+      "id": "50000000-0000-4000-8000-000000000001",
+      "order_id": "40000000-0000-4000-8000-000000000001",
+      "scheduled_date": "2026-06-17",
+      "quantity": 240
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000002",
+      "order_id": "40000000-0000-4000-8000-000000000002",
+      "scheduled_date": "2026-06-20",
+      "quantity": 300
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000003",
+      "order_id": "40000000-0000-4000-8000-000000000002",
+      "scheduled_date": "2026-06-24",
+      "quantity": 300
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000004",
+      "order_id": "40000000-0000-4000-8000-000000000002",
+      "scheduled_date": "2026-07-01",
+      "quantity": 300
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000005",
+      "order_id": "40000000-0000-4000-8000-000000000003",
+      "scheduled_date": "2026-06-19",
+      "quantity": 1200
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000006",
+      "order_id": "40000000-0000-4000-8000-000000000004",
+      "scheduled_date": "2026-06-18",
+      "quantity": 150
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000007",
+      "order_id": "40000000-0000-4000-8000-000000000004",
+      "scheduled_date": "2026-06-25",
+      "quantity": 150
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000008",
+      "order_id": "40000000-0000-4000-8000-000000000004",
+      "scheduled_date": "2026-07-02",
+      "quantity": 150
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000009",
+      "order_id": "40000000-0000-4000-8000-000000000005",
+      "scheduled_date": "2026-06-16",
+      "quantity": 60
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000010",
+      "order_id": "40000000-0000-4000-8000-000000000006",
+      "scheduled_date": "2026-06-21",
+      "quantity": 120
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000011",
+      "order_id": "40000000-0000-4000-8000-000000000007",
+      "scheduled_date": "2026-06-18",
+      "quantity": 200
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000012",
+      "order_id": "40000000-0000-4000-8000-000000000007",
+      "scheduled_date": "2026-06-26",
+      "quantity": 300
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000013",
+      "order_id": "40000000-0000-4000-8000-000000000008",
+      "scheduled_date": "2026-06-22",
+      "quantity": 720
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000014",
+      "order_id": "40000000-0000-4000-8000-000000000009",
+      "scheduled_date": "2026-06-24",
+      "quantity": 400
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000015",
+      "order_id": "40000000-0000-4000-8000-000000000009",
+      "scheduled_date": "2026-07-05",
+      "quantity": 600
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000016",
+      "order_id": "40000000-0000-4000-8000-000000000010",
+      "scheduled_date": "2026-06-12",
+      "quantity": 300
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000017",
+      "order_id": "40000000-0000-4000-8000-000000000011",
+      "scheduled_date": "2026-06-13",
+      "quantity": 250
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000018",
+      "order_id": "40000000-0000-4000-8000-000000000011",
+      "scheduled_date": "2026-06-20",
+      "quantity": 250
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000019",
+      "order_id": "40000000-0000-4000-8000-000000000011",
+      "scheduled_date": "2026-06-27",
+      "quantity": 250
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000020",
+      "order_id": "40000000-0000-4000-8000-000000000012",
+      "scheduled_date": "2026-06-14",
+      "quantity": 180
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000021",
+      "order_id": "40000000-0000-4000-8000-000000000013",
+      "scheduled_date": "2026-06-15",
+      "quantity": 210
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000022",
+      "order_id": "40000000-0000-4000-8000-000000000013",
+      "scheduled_date": "2026-06-22",
+      "quantity": 210
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000023",
+      "order_id": "40000000-0000-4000-8000-000000000014",
+      "scheduled_date": "2026-06-22",
+      "quantity": 80
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000024",
+      "order_id": "40000000-0000-4000-8000-000000000015",
+      "scheduled_date": "2026-06-23",
+      "quantity": 80
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000025",
+      "order_id": "40000000-0000-4000-8000-000000000015",
+      "scheduled_date": "2026-06-30",
+      "quantity": 80
+    }
+  ],
+  "order_products": [
+    {
+      "id": "41000000-0000-4000-8000-000000000001",
+      "order_id": "40000000-0000-4000-8000-000000000002",
+      "design_id": "30000000-0000-4000-8000-000000000007",
+      "quantity": 600,
+      "design_no_snapshot": "DS-7155",
+      "product_name_snapshot": "자동차 씰 R",
+      "specification_snapshot": "R-220 / 회색 / EPDM",
+      "department_code_snapshot": "R",
+      "default_units_per_hour_snapshot": 110
+    },
+    {
+      "id": "41000000-0000-4000-8000-000000000002",
+      "order_id": "40000000-0000-4000-8000-000000000002",
+      "design_id": "30000000-0000-4000-8000-000000000008",
+      "quantity": 300,
+      "design_no_snapshot": "DS-8022",
+      "product_name_snapshot": "압출 실리콘 가스켓 S",
+      "specification_snapshot": "S-120 / 적색 / 연속압출",
+      "department_code_snapshot": "S",
+      "default_units_per_hour_snapshot": 65
+    }
+  ],
+  "shipment_plans": [
+    {
+      "id": "51000000-0000-4000-8000-000000000001",
+      "order_id": "40000000-0000-4000-8000-000000000002",
+      "order_product_id": "41000000-0000-4000-8000-000000000001",
+      "planned_ship_date": "2026-06-20",
+      "quantity": 300,
+      "status": "ready"
+    },
+    {
+      "id": "51000000-0000-4000-8000-000000000002",
+      "order_id": "40000000-0000-4000-8000-000000000002",
+      "order_product_id": "41000000-0000-4000-8000-000000000001",
+      "planned_ship_date": "2026-06-24",
+      "quantity": 300,
+      "status": "ready"
+    },
+    {
+      "id": "51000000-0000-4000-8000-000000000003",
+      "order_id": "40000000-0000-4000-8000-000000000002",
+      "order_product_id": "41000000-0000-4000-8000-000000000002",
+      "planned_ship_date": "2026-07-01",
+      "quantity": 300,
+      "status": "ready"
+    }
+  ],
+  "production_plans": [
+    {
+      "id": "61000000-0000-4000-8000-000000000001",
+      "order_id": "40000000-0000-4000-8000-000000000002",
+      "order_product_id": "41000000-0000-4000-8000-000000000001",
+      "shipment_plan_id": "51000000-0000-4000-8000-000000000001",
+      "quantity": null,
+      "completed_quantity": 0,
+      "estimated_duration_minutes": null,
+      "duration_source": null,
+      "work_status": "unscheduled"
+    },
+    {
+      "id": "61000000-0000-4000-8000-000000000002",
+      "order_id": "40000000-0000-4000-8000-000000000002",
+      "order_product_id": "41000000-0000-4000-8000-000000000001",
+      "shipment_plan_id": "51000000-0000-4000-8000-000000000002",
+      "quantity": null,
+      "completed_quantity": 0,
+      "estimated_duration_minutes": null,
+      "duration_source": null,
+      "work_status": "unscheduled"
+    },
+    {
+      "id": "61000000-0000-4000-8000-000000000003",
+      "order_id": "40000000-0000-4000-8000-000000000002",
+      "order_product_id": "41000000-0000-4000-8000-000000000002",
+      "shipment_plan_id": "51000000-0000-4000-8000-000000000003",
+      "quantity": null,
+      "completed_quantity": 0,
+      "estimated_duration_minutes": null,
+      "duration_source": null,
+      "work_status": "unscheduled"
+    }
+  ]
+}

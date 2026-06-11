@@ -2,13 +2,23 @@ export type AppRole = "A" | "P" | "E";
 
 export type OrderStatus = "active" | "released" | "completed" | "cancelled";
 
-export type DeliveryType = "single" | "split";
-
 export type DepartmentCode = "R" | "S" | "P";
 
-export type DeliveryScheduleInput = {
-  scheduledDate: string;
+export type ShipmentStatus = "ready" | "partial" | "completed" | "stopped";
+
+export type ProductionDurationSource = "product_default" | "manual_override";
+
+export type ProductionWorkStatus = "unscheduled" | "scheduled" | "producing" | "completed";
+
+export type ShipmentPlanInput = {
+  plannedShipDate: string;
   quantity: number;
+};
+
+export type OrderProductInput = {
+  designId: string;
+  quantity: number;
+  shipmentPlans: ShipmentPlanInput[];
 };
 
 export type OrderFormInput = {
@@ -17,13 +27,10 @@ export type OrderFormInput = {
   customChannel?: string;
   customerId: string;
   contactId: string;
-  designId: string;
-  quantity: number;
-  deliveryType: DeliveryType;
-  schedules: DeliveryScheduleInput[];
+  products: OrderProductInput[];
 };
 
-export type FieldErrors = Partial<Record<keyof OrderFormInput | "schedules", string>>;
+export type FieldErrors = Partial<Record<keyof OrderFormInput | "products", string>>;
 
 export type ValidationResult = {
   ok: boolean;
@@ -39,18 +46,45 @@ export type OrderRecord = {
   channel: string;
   customerName: string;
   contactName: string;
+  products: OrderProductRecord[];
+  createdAt: string;
+  completedAt: string | null;
+};
+
+export type ProductionPlanRecord = {
+  id: string;
+  shipmentPlanId: string;
+  quantity: number | null;
+  completedQuantity: number;
+  estimatedDurationMinutes: number | null;
+  durationSource: ProductionDurationSource | null;
+  workStatus: ProductionWorkStatus;
+};
+
+export type ShipmentPlanRecord = {
+  id: string;
+  plannedShipDate: string;
+  quantity: number;
+  status: ShipmentStatus;
+  productionPlans: ProductionPlanRecord[];
+};
+
+export type OrderProductRecord = {
+  id: string;
+  designId: string;
   designNo: string;
   productName: string;
   specification: string;
   departmentCode: DepartmentCode;
+  defaultUnitsPerHour: number;
   quantity: number;
-  deliveryType: DeliveryType;
-  schedules: DeliveryScheduleInput[];
-  createdAt: string;
+  shipmentPlans: ShipmentPlanRecord[];
 };
 
 export type OrderListRow = OrderRecord & {
   statusLabel: string;
-  deliveryLabel: string;
+  productSummary: string;
+  shipmentLabel: string;
+  totalQuantity: number;
   searchText: string;
 };

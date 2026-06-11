@@ -1,5 +1,7 @@
 "use client";
 
+import { ToastNotification } from "@carbon/react";
+
 export type ToastMessage = {
   id: string;
   kind: "success" | "error" | "info";
@@ -12,11 +14,16 @@ export function ToastViewport({ messages }: { messages: ToastMessage[] }) {
   }
 
   return (
-    <div className="toast-viewport" aria-live="polite">
+    <div className="dss-toast-stack" aria-live="polite">
       {messages.map((message) => (
-        <div className={`toast toast--${message.kind}`} key={message.id}>
-          {message.title}
-        </div>
+        <ToastNotification
+          hideCloseButton
+          key={message.id}
+          kind={message.kind}
+          lowContrast
+          statusIconDescription={message.kind}
+          title={message.title}
+        />
       ))}
     </div>
   );

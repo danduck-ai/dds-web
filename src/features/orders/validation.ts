@@ -1,4 +1,4 @@
-import type { OrderFormInput, OrderStatus, ValidationResult } from "./types";
+import type { OrderFormInput, OrderProductInput, OrderStatus, ValidationResult } from "./types";
 
 const REQUIRED_MESSAGE = "필수 항목을 입력하세요.";
 
@@ -13,6 +13,51 @@ function addError(
 
 function isPresent(value: string | undefined) {
   return Boolean(value?.trim());
+}
+
+function validateProduct(
+  result: ValidationResult,
+  product: OrderProductInput,
+  productIndex: number,
+) {
+  const productLabel = `제품 ${productIndex + 1}`;
+
+  if (!isPresent(product.designId)) {
+    addError(result, "products", `${productLabel}: 제품/설계를 선택하세요.`);
+  }
+
+  if (!Number.isInteger(product.quantity) || product.quantity <= 0) {
+    addError(result, "products", `${productLabel}: 제품 수량은 1 이상이어야 합니다.`);
+  }
+
+  if (product.shipmentPlans.length === 0) {
+    addError(result, "products", `${productLabel}: 출하계획을 1건 이상 입력하세요.`);
+    return;
+  }
+
+  const hasInvalidShipmentPlan = product.shipmentPlans.some(
+    (plan) =>
+      !isPresent(plan.plannedShipDate) ||
+      !Number.isInteger(plan.quantity) ||
+      plan.quantity <= 0,
+  );
+
+  if (hasInvalidShipmentPlan) {
+    addError(result, "products", `${productLabel}: 모든 출하계획 행의 출하일과 수량을 입력하세요.`);
+  }
+
+  const shipmentTotal = product.shipmentPlans.reduce(
+    (sum, plan) => sum + (Number.isFinite(plan.quantity) ? plan.quantity : 0),
+    0,
+  );
+
+  if (product.quantity > 0 && shipmentTotal !== product.quantity) {
+    addError(
+      result,
+      "products",
+      `${productLabel}: 출하계획 수량 합계 ${shipmentTotal.toLocaleString("ko-KR")}개가 제품 수량 ${product.quantity.toLocaleString("ko-KR")}개와 일치해야 합니다.`,
+    );
+  }
 }
 
 export function validateOrderForm(input: OrderFormInput): ValidationResult {
@@ -38,44 +83,12 @@ export function validateOrderForm(input: OrderFormInput): ValidationResult {
     addError(result, "customerId", "고객사와 담당자를 선택하세요.");
   }
 
-  if (!isPresent(input.designId)) {
-    addError(result, "designId", "제품/설계를 선택하세요.");
-  }
-
-  if (!Number.isInteger(input.quantity) || input.quantity <= 0) {
-    addError(result, "quantity", "주문 수량은 1 이상이어야 합니다.");
-  }
-
-  if (input.deliveryType === "single") {
-    if (input.schedules.length !== 1) {
-      addError(result, "schedules", "일반 출하는 납기일 1건만 입력하세요.");
-    }
-  } else if (input.schedules.length < 2) {
-    addError(result, "schedules", "분할 출하는 2건 이상의 출하 행이 필요합니다.");
-  }
-
-  const hasInvalidSchedule = input.schedules.some(
-    (schedule) =>
-      !isPresent(schedule.scheduledDate) ||
-      !Number.isInteger(schedule.quantity) ||
-      schedule.quantity <= 0,
-  );
-
-  if (hasInvalidSchedule) {
-    addError(result, "schedules", "모든 분할 출하 행의 출하일과 수량을 입력하세요.");
-  }
-
-  const scheduleTotal = input.schedules.reduce(
-    (sum, schedule) => sum + (Number.isFinite(schedule.quantity) ? schedule.quantity : 0),
-    0,
-  );
-
-  if (input.quantity > 0 && scheduleTotal !== input.quantity) {
-    addError(
-      result,
-      "schedules",
-      `납기 수량 합계 ${scheduleTotal.toLocaleString("ko-KR")}개가 주문 수량 ${input.quantity.toLocaleString("ko-KR")}개와 일치해야 합니다.`,
-    );
+  if (input.products.length === 0) {
+    addError(result, "products", "제품을 1개 이상 입력하세요.");
+  } else {
+    input.products.forEach((product, productIndex) => {
+      validateProduct(result, product, productIndex);
+    });
   }
 
   result.ok = Object.keys(result.fieldErrors).length === 0;

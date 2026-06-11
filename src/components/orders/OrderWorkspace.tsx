@@ -1,52 +1,63 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { Button, Checkbox, Tile } from "@carbon/react";
+import { Add } from "@carbon/icons-react";
 import { useMemo, useState } from "react";
 
-import type { AppRole, OrderFormInput, OrderListRow, OrderStatus } from "@/features/orders/types";
+import type { AppRole, OrderListRow, OrderStatus } from "@/features/orders/types";
 import type { ContactOption, DesignOption } from "@/features/reference/data";
+import {
+  cancelLocalOrders,
+  createLocalOrder,
+  releaseLocalOrders,
+  updateLocalOrder,
+} from "@/features/orders/local-state";
 import { ConfirmActionModal } from "./ConfirmActionModal";
 import { OrderDrawer } from "./OrderDrawer";
 import { OrderTable } from "./OrderTable";
 import { ToastMessage, ToastViewport } from "@/components/notifications/ToastProvider";
 
-type ActionResult = {
-  ok: boolean;
-  message: string;
-  fieldErrors?: Partial<Record<keyof OrderFormInput | "schedules", string>>;
-};
+type OrderWorkspaceMode = "intake" | "status";
 
-const tabs: Array<{ status: OrderStatus; label: string; empty: string }> = [
-  { status: "active", label: "접수", empty: "접수된 주문이 없습니다." },
-  { status: "released", label: "생산중", empty: "생산중 주문이 없습니다." },
-  { status: "completed", label: "출하 완료", empty: "출하 완료 주문이 없습니다." },
-  { status: "cancelled", label: "삭제됨", empty: "취소된 주문이 없습니다." },
-];
+const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+
+function isCompletedAtLeastThreeDaysAgo(order: OrderListRow, currentDate: string) {
+  if (order.status !== "completed" || !order.completedAt) {
+    return false;
+  }
+
+  const completedAt = new Date(order.completedAt).getTime();
+  const currentAt = new Date(currentDate).getTime();
+
+  if (!Number.isFinite(completedAt) || !Number.isFinite(currentAt)) {
+    return false;
+  }
+
+  return currentAt - completedAt >= THREE_DAYS_MS;
+}
 
 export function OrderWorkspace({
   initialOrders,
   initialStatus,
+  mode = "intake",
   role,
+  receiverLabel,
   contactOptions,
   designOptions,
-  onCreateOrder,
-  onUpdateOrder,
-  onReleaseOrders,
-  onCancelOrders,
+  currentDate,
 }: {
   initialOrders: OrderListRow[];
   initialStatus: OrderStatus;
+  mode?: OrderWorkspaceMode;
   role: AppRole;
+  receiverLabel: string;
   contactOptions: ContactOption[];
   designOptions: DesignOption[];
-  onCreateOrder: (input: OrderFormInput) => Promise<ActionResult>;
-  onUpdateOrder?: (id: string, input: OrderFormInput) => Promise<ActionResult>;
-  onReleaseOrders: (ids: string[]) => Promise<ActionResult>;
-  onCancelOrders: (ids: string[]) => Promise<ActionResult>;
+  currentDate?: string;
 }) {
-  const router = useRouter();
-  const [activeStatus, setActiveStatus] = useState<OrderStatus>(initialStatus);
+  const [orders, setOrders] = useState<OrderListRow[]>(() => initialOrders);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [excludeOldCompleted, setExcludeOldCompleted] = useState(true);
   const [drawerState, setDrawerState] = useState<null | { mode: "create" | "edit"; order: OrderListRow | null }>(
     null,
   );
@@ -54,13 +65,30 @@ export function OrderWorkspace({
     null,
   );
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const effectiveCurrentDate = currentDate ?? new Date().toISOString();
 
   const rows = useMemo(
-    () => initialOrders.filter((order) => order.status === activeStatus),
-    [activeStatus, initialOrders],
+    () =>
+      orders.filter((order) => {
+        if (mode === "intake") {
+          return order.status === initialStatus;
+        }
+
+        if (order.status === "cancelled") {
+          return false;
+        }
+
+        return !excludeOldCompleted || !isCompletedAtLeastThreeDaysAgo(order, effectiveCurrentDate);
+      }),
+    [effectiveCurrentDate, excludeOldCompleted, initialStatus, mode, orders],
   );
-  const activeTab = tabs.find((tab) => tab.status === activeStatus) ?? tabs[0];
-  const canManage = role === "A" && activeStatus === "active";
+  const canManage = role === "A" && mode === "intake" && initialStatus === "active";
+  const title = mode === "intake" ? "주문 접수" : "주문 현황";
+  const description =
+    mode === "intake"
+      ? "새 주문을 등록하고 생산팀 전달 전 접수 주문을 관리합니다."
+      : "취소건을 제외한 전체 주문 진행 상태를 한 목록에서 확인합니다.";
+  const emptyMessage = mode === "intake" ? "접수 중인 주문이 없습니다." : "조회할 주문이 없습니다.";
 
   function showToast(kind: ToastMessage["kind"], title: string) {
     const id = `${Date.now()}-${Math.random()}`;
@@ -68,11 +96,6 @@ export function OrderWorkspace({
     window.setTimeout(() => {
       setToasts((current) => current.filter((toast) => toast.id !== id));
     }, 3000);
-  }
-
-  function switchTab(status: OrderStatus) {
-    setActiveStatus(status);
-    setSelectedIds(new Set());
   }
 
   function toggleAll() {
@@ -97,76 +120,61 @@ export function OrderWorkspace({
     });
   }
 
-  async function executePendingAction() {
+  function executePendingAction() {
     if (!pendingAction) {
       return;
     }
 
     const result =
       pendingAction.kind === "release"
-        ? await onReleaseOrders(pendingAction.ids)
-        : await onCancelOrders(pendingAction.ids);
+        ? releaseLocalOrders(orders, pendingAction.ids)
+        : cancelLocalOrders(orders, pendingAction.ids);
 
     showToast(result.ok ? "success" : "error", result.message);
     setPendingAction(null);
     setSelectedIds(new Set());
 
     if (result.ok) {
-      router.refresh();
+      setOrders(result.orders);
     }
   }
 
   return (
-    <main className="orders-page">
+    <main className="dss-page">
       <ToastViewport messages={toasts} />
-      <header className="orders-page__header">
+      <header className="dss-page-header">
         <div>
-          <h1>주문 현황</h1>
-          <p>등록된 주문을 접수, 생산중, 출하 완료, 삭제됨 상태로 관리합니다.</p>
+          <h1>{title}</h1>
+          <p>{description}</p>
         </div>
-        {role === "A" ? (
-          <button className="primary-button" type="button" onClick={() => setDrawerState({ mode: "create", order: null })}>
+        {canManage ? (
+          <Button renderIcon={Add} type="button" onClick={() => setDrawerState({ mode: "create", order: null })}>
             새 주문
-          </button>
+          </Button>
         ) : null}
       </header>
 
-      <div className="status-tabs" role="tablist" aria-label="주문 상태">
-        {tabs.map((tab) => (
-          <button
-            aria-selected={tab.status === activeStatus}
-            key={tab.status}
-            role="tab"
-            type="button"
-            onClick={() => switchTab(tab.status)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {canManage && selectedIds.size > 0 ? (
-        <div className="batch-bar">
-          <span>{selectedIds.size}건 선택됨</span>
-          <button type="button" onClick={() => setSelectedIds(new Set())}>
-            선택 취소
-          </button>
-          <button
-            type="button"
-            onClick={() => setPendingAction({ kind: "release", ids: Array.from(selectedIds) })}
-          >
-            선택 주문 생산팀 전달
-          </button>
+      {mode === "status" ? (
+        <div className="dss-order-filter-bar">
+          <Checkbox
+            checked={excludeOldCompleted}
+            id="orders-exclude-old-completed"
+            labelText="3일이상 출하완료건 제외"
+            onChange={(_, { checked }) => setExcludeOldCompleted(checked)}
+          />
         </div>
       ) : null}
 
       {rows.length === 0 ? (
-        <div className="empty-state">{activeTab.empty}</div>
+        <Tile className="dss-empty-state">{emptyMessage}</Tile>
       ) : (
         <OrderTable
           rows={rows}
           canManage={canManage}
           selectedIds={selectedIds}
+          onClearSelection={() => setSelectedIds(new Set())}
+          onReleaseSelected={() => setPendingAction({ kind: "release", ids: Array.from(selectedIds) })}
+          onCancelSelected={() => setPendingAction({ kind: "cancel", ids: Array.from(selectedIds) })}
           onToggleAll={toggleAll}
           onToggleOne={toggleOne}
           onEdit={(order) => setDrawerState({ mode: "edit", order })}
@@ -181,15 +189,22 @@ export function OrderWorkspace({
           order={drawerState.order}
           contactOptions={contactOptions}
           designOptions={designOptions}
+          receiverLabel={receiverLabel}
           onClose={() => setDrawerState(null)}
+          onFutureAction={(message) => showToast("info", message)}
           onSubmit={async (input) => {
             const result =
-              drawerState.mode === "edit" && drawerState.order && onUpdateOrder
-                ? await onUpdateOrder(drawerState.order.id, input)
-                : await onCreateOrder(input);
+              drawerState.mode === "edit" && drawerState.order
+                ? updateLocalOrder(drawerState.order, input, { contactOptions, designOptions })
+                : createLocalOrder(input, orders, { contactOptions, designOptions });
             showToast(result.ok ? "success" : "error", result.message);
             if (result.ok) {
-              router.refresh();
+              setOrders((current) =>
+                drawerState.mode === "edit" && drawerState.order
+                  ? current.map((order) => (order.id === drawerState.order?.id ? result.order : order))
+                  : [result.order, ...current],
+              );
+              setSelectedIds(new Set());
             }
             return result;
           }}
@@ -204,6 +219,7 @@ export function OrderWorkspace({
           }할까요?`}
           confirmLabel={pendingAction.kind === "release" ? "전달" : "주문 취소"}
           cancelLabel="돌아가기"
+          danger={pendingAction.kind === "cancel"}
           onCancel={() => setPendingAction(null)}
           onConfirm={executePendingAction}
         />

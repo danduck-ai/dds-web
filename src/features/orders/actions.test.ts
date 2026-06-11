@@ -14,12 +14,15 @@ const form: OrderFormInput = {
   customChannel: "",
   customerId: "customer-1",
   contactId: "contact-1",
-  designId: "design-1",
-  quantity: 500,
-  deliveryType: "split",
-  schedules: [
-    { scheduledDate: "2026-06-18", quantity: 300 },
-    { scheduledDate: "2026-06-25", quantity: 200 },
+  products: [
+    {
+      designId: "design-1",
+      quantity: 500,
+      shipmentPlans: [
+        { plannedShipDate: "2026-06-18", quantity: 300 },
+        { plannedShipDate: "2026-06-25", quantity: 200 },
+      ],
+    },
   ],
 };
 
@@ -28,33 +31,65 @@ describe("buildCreateOrderMutation", () => {
     const result = buildCreateOrderMutation(
       {
         ...form,
-        schedules: [{ scheduledDate: "2026-06-18", quantity: 300 }],
+        products: [
+          {
+            designId: "design-1",
+            quantity: 500,
+            shipmentPlans: [{ plannedShipDate: "2026-06-18", quantity: 300 }],
+          },
+        ],
       },
       "profile-1",
     );
 
     expect(result.ok).toBe(false);
-    expect(result.fieldErrors?.schedules).toContain("납기 수량 합계");
+    expect(result.fieldErrors?.products).toContain("출하계획 수량 합계");
   });
 
-  test("creates an order payload and matching delivery schedules", () => {
+  test("creates order, product, shipment plan, and empty production plan payloads", () => {
     const result = buildCreateOrderMutation(form, "profile-1");
 
-    expect(result.ok).toBe(true);
+    if (!result.ok) {
+      throw new Error("Expected valid form to create an order mutation.");
+    }
+
     expect(result.order).toMatchObject({
       status: "active",
       requested_date: "2026-06-10",
       channel: "카톡",
       customer_id: "customer-1",
       contact_id: "contact-1",
-      design_id: "design-1",
-      quantity: 500,
-      delivery_type: "split",
       received_by: "profile-1",
     });
-    expect(result.schedules).toEqual([
-      { scheduled_date: "2026-06-18", quantity: 300 },
-      { scheduled_date: "2026-06-25", quantity: 200 },
+    expect(result.orderProducts).toEqual([
+      {
+        design_id: "design-1",
+        quantity: 500,
+        shipment_plans: [
+          {
+            planned_ship_date: "2026-06-18",
+            quantity: 300,
+            production_plan: {
+              quantity: null,
+              completed_quantity: 0,
+              estimated_duration_minutes: null,
+              duration_source: null,
+              work_status: "unscheduled",
+            },
+          },
+          {
+            planned_ship_date: "2026-06-25",
+            quantity: 200,
+            production_plan: {
+              quantity: null,
+              completed_quantity: 0,
+              estimated_duration_minutes: null,
+              duration_source: null,
+              work_status: "unscheduled",
+            },
+          },
+        ],
+      },
     ]);
   });
 });
