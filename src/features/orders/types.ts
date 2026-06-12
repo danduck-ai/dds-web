@@ -59,6 +59,9 @@ export type ProductionPlanRecord = {
   estimatedDurationMinutes: number | null;
   durationSource: ProductionDurationSource | null;
   workStatus: ProductionWorkStatus;
+  availableFromDate?: string | null;
+  productionDate?: string | null;
+  sequence?: number;
 };
 
 export type ShipmentPlanRecord = {

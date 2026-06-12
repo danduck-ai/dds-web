@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 
+import { listOrderStatusRows } from "@/features/orders/data";
+import { createProductionPlanningCards } from "@/features/production/planning";
 import mockData from "./dss.json";
 
 describe("DSS mock data", () => {
@@ -72,5 +74,57 @@ describe("DSS mock data", () => {
         work_status: "unscheduled",
       });
     }
+  });
+
+  test("keeps target-model product, shipment, and production plan quantities consistent", () => {
+    for (const product of mockData.order_products) {
+      const shipmentPlans = mockData.shipment_plans.filter((plan) => plan.order_product_id === product.id);
+      const shipmentTotal = shipmentPlans.reduce((sum, plan) => sum + plan.quantity, 0);
+
+      expect(shipmentPlans.length, `${product.id} shipment plans`).toBeGreaterThan(0);
+      expect(shipmentTotal, `${product.id} shipment total`).toBe(product.quantity);
+    }
+
+    for (const shipmentPlan of mockData.shipment_plans) {
+      const productionPlans = mockData.production_plans.filter((plan) => plan.shipment_plan_id === shipmentPlan.id);
+      const productionTotal = productionPlans.reduce((sum, plan) => sum + (plan.quantity ?? 0), 0);
+
+      expect(productionPlans.length, `${shipmentPlan.id} production plans`).toBeGreaterThan(0);
+      expect(productionTotal, `${shipmentPlan.id} production total`).toBeLessThanOrEqual(shipmentPlan.quantity);
+
+      for (const productionPlan of productionPlans) {
+        if (productionPlan.quantity === null) {
+          expect(productionPlan.estimated_duration_minutes, productionPlan.id).toBeNull();
+          expect(productionPlan.duration_source, productionPlan.id).toBeNull();
+        } else {
+          expect(productionPlan.quantity, productionPlan.id).toBeGreaterThan(0);
+          expect(productionPlan.estimated_duration_minutes, productionPlan.id).toBeGreaterThan(0);
+          expect(productionPlan.completed_quantity, productionPlan.id).toBeLessThanOrEqual(productionPlan.quantity);
+        }
+      }
+    }
+  });
+
+  test("feeds production planning with varied released cards across departments and dates", async () => {
+    const orders = await listOrderStatusRows();
+    const cardsFor = (departmentCode: "R" | "S" | "P", productionDate = "2026-06-12") =>
+      createProductionPlanningCards(orders, {
+        departmentCode,
+        productionDate,
+      });
+
+    const rCards = cardsFor("R");
+    const sCards = cardsFor("S");
+    const pCards = cardsFor("P");
+    const sCardsTomorrow = cardsFor("S", "2026-06-13");
+
+    expect(rCards.length).toBeGreaterThanOrEqual(5);
+    expect(sCards.length).toBeGreaterThanOrEqual(1);
+    expect(pCards.length).toBeGreaterThanOrEqual(3);
+
+    expect(rCards.some((card) => card.productionDate === "2026-06-12" && card.sequence === 1)).toBe(true);
+    expect(rCards.some((card) => card.quantity === null && card.remainingQuantity === 120)).toBe(true);
+    expect(sCardsTomorrow.some((card) => card.availableFromDate === "2026-06-13")).toBe(true);
+    expect(pCards.some((card) => card.workStatus === "producing" && card.quantity !== null)).toBe(true);
   });
 });
