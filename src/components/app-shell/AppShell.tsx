@@ -11,10 +11,11 @@ import {
   SideNavLink,
   Stack,
 } from "@carbon/react";
-import { DocumentAdd, ListChecked, Logout, Product, UserMultiple } from "@carbon/icons-react";
+import { Calendar, DocumentAdd, ListChecked, Logout, Product, UserMultiple } from "@carbon/icons-react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
+import { DssThemeCycleButton, DssThemeProvider, getShellTheme, useDssTheme } from "@/components/theme/DssThemeProvider";
 import type { AppRole } from "@/features/orders/types";
 import { signOut } from "@/lib/auth/actions";
 
@@ -40,12 +41,17 @@ const menuByRole: Record<AppRole, MenuItem[]> = {
   A: [
     { href: "/orders/intake", label: "주문 접수", icon: DocumentAdd },
     { href: "/orders", label: "주문 현황", icon: ListChecked },
+    { href: "/production/plans", label: "생산 계획", icon: Calendar },
     { href: "/reference/designs", label: "설계 관리", icon: Product },
     { href: "/reference/customers", label: "고객 관리", icon: UserMultiple },
   ],
-  P: [{ href: "/orders", label: "주문 현황", icon: ListChecked }],
+  P: [
+    { href: "/orders", label: "주문 현황", icon: ListChecked },
+    { href: "/production/plans", label: "생산 계획", icon: Calendar },
+  ],
   E: [
     { href: "/orders", label: "주문 현황", icon: ListChecked },
+    { href: "/production/plans", label: "생산 계획", icon: Calendar },
     { href: "/reference/designs", label: "설계 관리", icon: Product },
     { href: "/reference/customers", label: "고객 관리", icon: UserMultiple },
   ],
@@ -64,11 +70,31 @@ export function AppShell({
   children: ReactNode;
   currentPath?: string;
 }) {
+  return (
+    <DssThemeProvider>
+      <AppShellFrame currentPath={currentPath} profile={profile}>
+        {children}
+      </AppShellFrame>
+    </DssThemeProvider>
+  );
+}
+
+function AppShellFrame({
+  profile,
+  children,
+  currentPath,
+}: {
+  profile: ShellProfile;
+  children: ReactNode;
+  currentPath?: string;
+}) {
   const currentPathname = currentPath ? pathnameOf(currentPath) : "";
   const homeHref = menuByRole[profile.role][0]?.href ?? "/orders";
   const [isSideNavExpanded, setIsSideNavExpanded] = useState(true);
   const [isLargeViewport, setIsLargeViewport] = useState(true);
   const isSideNavRail = !isSideNavExpanded && isLargeViewport;
+  const { resolvedTheme } = useDssTheme();
+  const shellTheme = getShellTheme(resolvedTheme);
 
   useEffect(() => {
     const query = window.matchMedia("(min-width: 1056px)");
@@ -96,10 +122,15 @@ export function AppShell({
         <HeaderName href={homeHref} prefix="DSS">
           동성실리콘
         </HeaderName>
+        <div className="dss-header-actions">
+          <DssThemeCycleButton />
+        </div>
       </Header>
 
       <SideNav
         aria-label="업무 메뉴"
+        className={`cds--${shellTheme}`}
+        data-dss-shell-theme={shellTheme}
         expanded={isSideNavExpanded}
         id="dss-side-nav"
         isFixedNav

@@ -84,6 +84,9 @@ type MockProductionPlanRow = {
   estimated_duration_minutes: number | null;
   duration_source: string | null;
   work_status: string;
+  available_from_date?: string | null;
+  production_date?: string | null;
+  sequence?: number | null;
 };
 
 type MockData = {
@@ -151,6 +154,9 @@ function mapProductionPlanRow(row: MockProductionPlanRow): ProductionPlanRecord 
     estimatedDurationMinutes: row.estimated_duration_minutes,
     durationSource: asProductionDurationSource(row.duration_source),
     workStatus: asProductionWorkStatus(row.work_status),
+    availableFromDate: row.available_from_date ?? null,
+    productionDate: row.production_date ?? null,
+    sequence: row.sequence ?? undefined,
   };
 }
 

@@ -6,6 +6,7 @@ export type CurrentProfile = {
   email: string;
   displayName: string;
   role: AppRole;
+  departmentCode?: string | null;
 };
 
 type ProfileRow = {
@@ -13,6 +14,7 @@ type ProfileRow = {
   email: string;
   display_name: string;
   role: AppRole;
+  department_code?: string | null;
 };
 
 export async function getCurrentProfile(): Promise<CurrentProfile | null> {
@@ -29,5 +31,6 @@ export async function getCurrentProfile(): Promise<CurrentProfile | null> {
     email: data.email,
     displayName: data.display_name,
     role: data.role,
+    departmentCode: data.department_code ?? null,
   };
 }
