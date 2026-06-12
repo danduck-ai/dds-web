@@ -1,6 +1,7 @@
 @use "@carbon/react/scss/reset";
 @use "@carbon/react/scss/type" as type;
 @use "@carbon/react/scss/components";
+@use "@carbon/react/scss/zone";
 @use "@carbon/react/scss/spacing" as *;
 @use "@carbon/react/scss/theme" as *;
 
@@ -19,6 +20,12 @@ body {
 body {
   font-family: "IBM Plex Sans KR", "IBM Plex Sans", system-ui, -apple-system,
     BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.dss-theme-root {
+  min-block-size: 100dvh;
+  background: $background;
+  color: $text-primary;
 }
 
 .dss-login-page {
@@ -75,6 +82,83 @@ body {
 
 .cds--content.dss-shell-content[data-side-nav-rail="true"] {
   margin-inline-start: 3rem;
+}
+
+.dss-header-actions {
+  block-size: 100%;
+  display: flex;
+  align-items: center;
+  margin-inline-start: auto;
+  padding-inline-end: $spacing-05;
+}
+
+.dss-theme-cycle-button {
+  @include type.type-style("label-01");
+
+  --dss-theme-cycle-background: #f4f4f4;
+  --dss-theme-cycle-border: #c6c6c6;
+  --dss-theme-cycle-color: #161616;
+  --dss-theme-cycle-hover: #e8e8e8;
+
+  inline-size: 2rem;
+  min-inline-size: 2rem;
+  max-inline-size: 2rem;
+  block-size: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  color: var(--dss-theme-cycle-color);
+  background: var(--dss-theme-cycle-background);
+  border: 1px solid var(--dss-theme-cycle-border);
+  cursor: pointer;
+  transition:
+    background-color 110ms ease,
+    border-color 110ms ease,
+    color 110ms ease;
+
+  &:hover {
+    background: var(--dss-theme-cycle-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $focus;
+    outline-offset: 2px;
+  }
+}
+
+.dss-theme-cycle-button[data-dss-theme="white"] {
+  --dss-theme-cycle-background: #ffffff;
+  --dss-theme-cycle-border: #c6c6c6;
+  --dss-theme-cycle-color: #161616;
+  --dss-theme-cycle-hover: #f4f4f4;
+}
+
+.dss-theme-cycle-button[data-dss-theme="g10"] {
+  --dss-theme-cycle-background: #f4f4f4;
+  --dss-theme-cycle-border: #c6c6c6;
+  --dss-theme-cycle-color: #161616;
+  --dss-theme-cycle-hover: #e8e8e8;
+}
+
+.dss-theme-cycle-button[data-dss-theme="g90"] {
+  --dss-theme-cycle-background: #262626;
+  --dss-theme-cycle-border: #525252;
+  --dss-theme-cycle-color: #f4f4f4;
+  --dss-theme-cycle-hover: #393939;
+}
+
+.dss-theme-cycle-button[data-dss-theme="g100"] {
+  --dss-theme-cycle-background: #161616;
+  --dss-theme-cycle-border: #393939;
+  --dss-theme-cycle-color: #f4f4f4;
+  --dss-theme-cycle-hover: #262626;
+}
+
+.dss-theme-cycle-button__icon {
+  flex: 0 0 auto;
 }
 
 .dss-shell-profile {
@@ -134,6 +218,357 @@ body {
   display: grid;
   place-items: center;
   color: $text-secondary;
+}
+
+.dss-production-page {
+  display: grid;
+  gap: $spacing-05;
+
+  .dss-page-header,
+  .dss-status-switcher {
+    margin-block-end: 0;
+  }
+}
+
+.dss-production-under-construction {
+  min-block-size: 18rem;
+  display: grid;
+  place-items: center;
+  border: 1px dashed $border-subtle;
+  color: $text-secondary;
+}
+
+.dss-production-controls {
+  display: grid;
+  grid-template-columns:
+    minmax(11rem, 0.8fr)
+    minmax(8rem, 0.5fr)
+    minmax(10rem, 0.6fr)
+    auto;
+  gap: $spacing-04;
+  align-items: end;
+  padding: $spacing-05;
+  background: $layer;
+  border: 1px solid $border-subtle;
+
+  .cds--btn {
+    min-inline-size: 7rem;
+  }
+}
+
+.dss-production-notification {
+  max-inline-size: 32rem;
+}
+
+.dss-production-transfer {
+  --dss-production-timeline-row-height: #{$spacing-09};
+  --dss-production-panel-action-offset: calc(4.25rem + #{$spacing-03});
+
+  display: grid;
+  grid-template-columns: minmax(19rem, 0.95fr) auto minmax(25rem, 1.25fr);
+  gap: $spacing-04;
+  align-items: stretch;
+}
+
+.dss-production-panel {
+  min-block-size: 34rem;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: $background;
+  border: 1px solid $border-subtle;
+  transition:
+    border-color 110ms ease,
+    box-shadow 110ms ease;
+}
+
+.dss-production-panel[data-active="true"] {
+  border-color: $focus;
+  box-shadow: inset 0 0 0 1px $focus;
+
+  .dss-production-panel__header {
+    background: $layer-accent;
+    border-block-end-color: $focus;
+  }
+}
+
+.dss-production-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+  padding: $spacing-04 $spacing-05;
+  background: $layer;
+  border-block-end: 1px solid $border-subtle;
+
+  h2 {
+    @include type.type-style("heading-compact-01");
+
+    margin: 0;
+  }
+
+  span {
+    @include type.type-style("label-01");
+
+    color: $text-secondary;
+  }
+}
+
+.dss-production-available-list {
+  min-block-size: 0;
+  display: grid;
+  align-content: start;
+  gap: $spacing-02;
+  margin: 0;
+  padding: $spacing-03;
+  overflow: auto;
+  list-style: none;
+}
+
+.dss-production-available-row {
+  min-block-size: var(--dss-production-timeline-row-height);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  padding: $spacing-03 $spacing-04;
+  background: $layer;
+  border: 1px solid $border-subtle;
+  transition:
+    background-color 110ms ease,
+    border-color 110ms ease;
+
+  &[data-selected="true"] {
+    background: $layer-accent;
+    border-color: $focus;
+    box-shadow: inset $spacing-01 0 0 $focus;
+  }
+
+  .cds--form-item,
+  .cds--checkbox-wrapper {
+    min-inline-size: 0;
+    overflow: hidden;
+  }
+
+  .cds--checkbox-label {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .cds--checkbox-label-text {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.dss-production-transfer__actions {
+  min-inline-size: 6.5rem;
+  display: grid;
+  align-content: center;
+  gap: $spacing-03;
+
+  .cds--btn {
+    justify-content: center;
+    inline-size: 100%;
+  }
+}
+
+.dss-production-transfer__actions--panel-top {
+  align-content: start;
+  padding-block-start: var(--dss-production-panel-action-offset);
+}
+
+.dss-production-timeline-list {
+  min-block-size: calc(18 * var(--dss-production-timeline-row-height));
+  display: grid;
+  align-content: start;
+  gap: $spacing-02;
+  padding: $spacing-03;
+  overflow: auto;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--dss-production-timeline-row-height) - 1px),
+      $border-subtle calc(var(--dss-production-timeline-row-height) - 1px),
+      $border-subtle var(--dss-production-timeline-row-height)
+    ),
+    $background;
+}
+
+.dss-production-scheduled-card {
+  min-block-size: calc(var(--dss-production-row-span, 1) * var(--dss-production-timeline-row-height));
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: $spacing-03;
+  align-items: stretch;
+  padding: $spacing-03;
+  background: $layer;
+  border: 1px solid $border-strong;
+  border-inline-start: $spacing-01 solid $support-info;
+  transition:
+    background-color 110ms ease,
+    border-color 110ms ease,
+    box-shadow 110ms ease;
+}
+
+.dss-production-scheduled-card[data-selected="true"] {
+  background: $layer-accent;
+  border-color: $focus;
+  border-inline-start-color: $focus;
+  box-shadow: inset 0 0 0 1px $focus;
+}
+
+.dss-production-scheduled-card[data-dragging="true"] {
+  box-shadow: 0 $spacing-02 $spacing-05 rgba(0, 0, 0, 0.18);
+}
+
+.dss-production-scheduled-card__select {
+  display: grid;
+  align-items: center;
+}
+
+.dss-production-scheduled-card__handle {
+  min-inline-size: 0;
+  display: grid;
+  grid-template-columns: minmax(6.5rem, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: $spacing-04;
+  padding: $spacing-02;
+  cursor: grab;
+}
+
+.dss-production-scheduled-card__handle:active {
+  cursor: grabbing;
+}
+
+.dss-production-scheduled-card__handle:focus-visible {
+  outline: 2px solid $focus;
+  outline-offset: -2px;
+}
+
+.dss-production-scheduled-card__time {
+  @include type.type-style("label-01");
+
+  display: inline-flex;
+  align-items: flex-start;
+  gap: $spacing-02;
+  color: $text-secondary;
+  white-space: nowrap;
+}
+
+.dss-production-scheduled-card__time-text {
+  display: grid;
+  gap: $spacing-01;
+
+  span:last-child {
+    @include type.type-style("helper-text-01");
+
+    color: $text-helper;
+  }
+}
+
+.dss-production-scheduled-card__main {
+  min-inline-size: 0;
+  display: grid;
+  gap: $spacing-01;
+
+  strong {
+    @include type.type-style("heading-compact-01");
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dss-production-scheduled-card__secondary {
+    @include type.type-style("label-01");
+
+    min-inline-size: 0;
+    display: inline-flex;
+    gap: $spacing-02;
+    overflow: hidden;
+    color: $text-secondary;
+    white-space: nowrap;
+
+    span:first-child {
+      min-inline-size: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    span:last-child {
+      flex: 0 0 auto;
+    }
+  }
+}
+
+.dss-production-scheduled-card__metrics {
+  @include type.type-style("label-01");
+
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-03;
+  color: $text-secondary;
+  white-space: nowrap;
+}
+
+.dss-production-quantity-modal {
+  max-block-size: min(62dvh, 42rem);
+  display: grid;
+  gap: $spacing-04;
+  padding-inline-end: $spacing-03;
+  overflow: auto;
+}
+
+.dss-production-quantity-modal__item {
+  display: grid;
+  gap: $spacing-04;
+  padding: $spacing-04;
+  background: $layer;
+  border: 1px solid $border-subtle;
+}
+
+.dss-production-quantity-modal__header {
+  display: flex;
+  justify-content: space-between;
+  gap: $spacing-04;
+
+  h3 {
+    @include type.type-style("heading-compact-01");
+
+    margin: 0;
+  }
+
+  p {
+    @include type.type-style("label-01");
+
+    margin: $spacing-01 0 0;
+    color: $text-secondary;
+  }
+}
+
+.dss-production-quantity-modal__meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: $spacing-03;
+  margin: 0;
+
+  dt {
+    @include type.type-style("label-01");
+
+    color: $text-secondary;
+  }
+
+  dd {
+    @include type.type-style("body-compact-01");
+
+    min-inline-size: 0;
+    margin: $spacing-01 0 0;
+    overflow-wrap: anywhere;
+  }
 }
 
 .dss-order-table {
@@ -305,6 +740,40 @@ body {
   }
 
   .dss-page-header {
+    display: grid;
+  }
+
+  .dss-production-controls,
+  .dss-production-transfer,
+  .dss-production-scheduled-card,
+  .dss-production-quantity-modal__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .dss-production-controls {
+    padding: $spacing-04;
+  }
+
+  .dss-production-panel {
+    min-block-size: 24rem;
+  }
+
+  .dss-production-transfer__actions {
+    min-inline-size: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-block-start: 0;
+  }
+
+  .dss-production-scheduled-card__handle {
+    grid-template-columns: 1fr;
+    gap: $spacing-02;
+  }
+
+  .dss-production-scheduled-card > .cds--btn {
+    justify-self: end;
+  }
+
+  .dss-production-quantity-modal__header {
     display: grid;
   }
 
