@@ -1,6 +1,7 @@
 .DS_Store
 .env*.local
 .next/
+next-env.d.ts
 node_modules/
 coverage/
 playwright-report/
