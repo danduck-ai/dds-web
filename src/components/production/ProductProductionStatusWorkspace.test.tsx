@@ -99,6 +99,22 @@ function renderWorkspace() {
   );
 }
 
+function expectCarbonExpandableZebraRows(table: HTMLElement) {
+  const tableBody = table.querySelector("tbody");
+  expect(tableBody).not.toBeNull();
+
+  const parentRows = Array.from(tableBody!.children).filter((row) => row.hasAttribute("data-parent-row"));
+  const childRows = Array.from(tableBody!.children).filter((row) => row.hasAttribute("data-child-row"));
+
+  expect(table).toHaveClass("cds--data-table--zebra");
+  expect(parentRows.length).toBeGreaterThan(0);
+  expect(childRows).toHaveLength(parentRows.length);
+
+  parentRows.forEach((parentRow) => {
+    expect(parentRow.nextElementSibling).toHaveAttribute("data-child-row", "true");
+  });
+}
+
 describe("ProductProductionStatusWorkspace", () => {
   test("defaults to daily production rows with existing production day plans", () => {
     renderWorkspace();
@@ -245,23 +261,21 @@ describe("ProductProductionStatusWorkspace", () => {
     expect(within(region).queryByText("0% (0/120)")).not.toBeInTheDocument();
   });
 
-  test("uses stable group styling for order rows instead of Carbon zebra striping", async () => {
+  test("uses Carbon expandable zebra row pairs for order rows", async () => {
     const user = userEvent.setup();
     renderWorkspace();
 
     await user.click(screen.getByRole("tab", { name: "주문별" }));
 
     const orderTable = screen.getByRole("table", { name: "주문 목록" });
-    const orderRow = screen.getByText("O-DSE-26061300001").closest("tr");
 
-    expect(orderTable).not.toHaveClass("cds--data-table--zebra");
-    expect(orderRow).toHaveClass("dss-product-status-order-row");
+    expectCarbonExpandableZebraRows(orderTable);
 
     await user.click(screen.getByRole("button", { name: "O-DSE-26061300001 주문제품 펼치기" }));
 
     const expandedRegion = screen.getByRole("region", { name: "O-DSE-26061300001 주문제품 생산 계획" });
-    expect(orderRow).toHaveAttribute("data-dss-expanded", "true");
-    expect(expandedRegion.closest("tr")).toHaveClass("dss-product-status-order-expanded-row");
+    expect(expandedRegion.closest("tr")).toHaveAttribute("data-child-row", "true");
+    expect(expandedRegion.closest("tr")?.previousElementSibling).toHaveAttribute("data-parent-row", "true");
   });
 
   test("opens the same production plan drawer from an expanded order product row", async () => {

@@ -87,10 +87,15 @@ function InventoryStatusTable({ rows }: { rows: ProductionInventoryRow[] }) {
                   </TableCell>
                   <TableCell>{formatNumber(row.stockQuantity)}개</TableCell>
                 </TableExpandRow>
-                {isExpanded ? (
-                  <TableExpandedRow className="dss-inventory-status-table__expanded" colSpan={4} id={`inventory-storage-${row.orderProductId}`}>
+                <TableExpandedRow
+                  className="dss-inventory-status-table__expanded"
+                  colSpan={4}
+                  hidden={!isExpanded}
+                  id={`inventory-storage-${row.orderProductId}`}
+                >
+                  {isExpanded ? (
                     <TableContainer title={`${row.productName} 보관장소별 재고`}>
-                      <Table className="dss-inventory-storage-table" size="md">
+                      <Table className="dss-inventory-storage-table" size="md" useZebraStyles>
                         <TableHead>
                           <TableRow>
                             <TableHeader>보관장소</TableHeader>
@@ -107,8 +112,8 @@ function InventoryStatusTable({ rows }: { rows: ProductionInventoryRow[] }) {
                         </TableBody>
                       </Table>
                     </TableContainer>
-                  </TableExpandedRow>
-                ) : null}
+                  ) : null}
+                </TableExpandedRow>
               </Fragment>
             );
           })}

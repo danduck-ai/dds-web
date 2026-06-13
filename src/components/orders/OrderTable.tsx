@@ -269,8 +269,8 @@ export function OrderTable({
                     </TableCell>
                   ) : null}
                 </TableExpandRow>
-                {isExpanded ? (
-                  <TableExpandedRow id={`order-products-${row.id}`} colSpan={tableColumnCount}>
+                <TableExpandedRow colSpan={tableColumnCount} hidden={!isExpanded} id={`order-products-${row.id}`}>
+                  {isExpanded ? (
                     <section
                       aria-label={`${row.orderNo} 주문 품목`}
                       className="dss-order-products"
@@ -305,8 +305,8 @@ export function OrderTable({
                         ))}
                       </div>
                     </section>
-                  </TableExpandedRow>
-                ) : null}
+                  ) : null}
+                </TableExpandedRow>
               </Fragment>
             );
           })}

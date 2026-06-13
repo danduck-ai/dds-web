@@ -206,7 +206,7 @@ function OrderProductsTable({
       className="dss-product-status-order-products"
       role="region"
     >
-      <Table className="dss-product-status-table dss-product-status-table--nested" size="md">
+      <Table className="dss-product-status-table dss-product-status-table--nested" size="md" useZebraStyles>
         <TableHead>
           <TableRow>
             <TableHeader>고객사</TableHeader>
@@ -247,7 +247,7 @@ function OrderStatusTable({
 
   return (
     <TableContainer description={`기준일 ${currentDate}`} title="주문 목록">
-      <Table className="dss-product-status-order-table" size="lg">
+      <Table className="dss-product-status-order-table" size="lg" useZebraStyles>
         <TableHead>
           <TableRow>
             <TableExpandHeader id="product-status-orders-expand" />
@@ -266,8 +266,6 @@ function OrderStatusTable({
                 <TableExpandRow
                   aria-controls={`product-status-order-products-${row.id}`}
                   aria-label={`${row.orderNo} 주문제품 펼치기`}
-                  className="dss-product-status-order-row"
-                  data-dss-expanded={isExpanded ? "true" : undefined}
                   expandHeader="product-status-orders-expand"
                   expandIconDescription="주문제품 펼치기"
                   isExpanded={isExpanded}
@@ -278,15 +276,15 @@ function OrderStatusTable({
                   <TableCell title={row.customerName}>{row.customerName}</TableCell>
                   <TableCell title={`${row.productCount}`}>{formatNumber(row.productCount)}개</TableCell>
                 </TableExpandRow>
-                {isExpanded ? (
-                  <TableExpandedRow
-                    className="dss-product-status-order-expanded-row"
-                    id={`product-status-order-products-${row.id}`}
-                    colSpan={5}
-                  >
+                <TableExpandedRow
+                  colSpan={5}
+                  hidden={!isExpanded}
+                  id={`product-status-order-products-${row.id}`}
+                >
+                  {isExpanded ? (
                     <OrderProductsTable onOpenPlan={onOpenPlan} order={row} />
-                  </TableExpandedRow>
-                ) : null}
+                  ) : null}
+                </TableExpandedRow>
               </Fragment>
             );
           })}

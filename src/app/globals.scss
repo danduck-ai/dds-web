@@ -611,45 +611,14 @@ body {
 
 .dss-product-status-order-table {
   min-inline-size: 48rem;
-
-  tbody tr.dss-product-status-order-row > td {
-    background: $layer;
-    border-block-end: 1px solid $border-subtle;
-  }
-
-  tbody tr.dss-product-status-order-row:hover > td {
-    background: var(--cds-layer-hover, #393939);
-  }
-
-  tbody tr.dss-product-status-order-row[data-dss-expanded="true"] > td {
-    background: $layer;
-    border-block-end: 0;
-  }
-
-  tbody tr.dss-product-status-order-expanded-row > td {
-    padding: 0;
-    background: $layer;
-    border-block-start: 0;
-    border-block-end: 1px solid $border-subtle;
-  }
 }
 
 .dss-product-status-order-products {
   padding: $spacing-04;
-  background: $layer;
 }
 
 .dss-product-status-table--nested {
   min-inline-size: 54rem;
-
-  tbody tr > td {
-    background: $layer;
-    border-block-end: 1px solid $border-subtle;
-  }
-
-  tbody tr:hover > td {
-    background: var(--cds-layer-hover, #393939);
-  }
 }
 
 .dss-product-status-table__secondary {

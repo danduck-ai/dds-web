@@ -86,6 +86,22 @@ const seed: ProductionManagementSeed = {
   ],
 };
 
+function expectCarbonExpandableZebraRows(table: HTMLElement) {
+  const tableBody = table.querySelector("tbody");
+  expect(tableBody).not.toBeNull();
+
+  const parentRows = Array.from(tableBody!.children).filter((row) => row.hasAttribute("data-parent-row"));
+  const childRows = Array.from(tableBody!.children).filter((row) => row.hasAttribute("data-child-row"));
+
+  expect(table).toHaveClass("cds--data-table--zebra");
+  expect(parentRows.length).toBeGreaterThan(0);
+  expect(childRows).toHaveLength(parentRows.length);
+
+  parentRows.forEach((parentRow) => {
+    expect(parentRow.nextElementSibling).toHaveAttribute("data-child-row", "true");
+  });
+}
+
 describe("InventoryManagementWorkspace", () => {
   test("renders inventory status and inbound/outbound history on one screen", () => {
     render(<InventoryManagementWorkspace initialSeed={seed} />);
@@ -107,6 +123,7 @@ describe("InventoryManagementWorkspace", () => {
     expect(within(inventoryTable).getByText("압출 실리콘 가스켓 S")).toBeInTheDocument();
     expect(within(inventoryTable).getByText("85개")).toBeInTheDocument();
     expect(within(inventoryTable).queryByText("실리콘 패킹 R")).not.toBeInTheDocument();
+    expectCarbonExpandableZebraRows(inventoryTable);
 
     const ledgerTable = screen.getByRole("table", { name: "입/출고 내역" });
     expect(within(ledgerTable).getByRole("columnheader", { name: "구분" })).toBeInTheDocument();

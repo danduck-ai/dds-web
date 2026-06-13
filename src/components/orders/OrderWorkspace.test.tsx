@@ -255,6 +255,22 @@ function renderWorkspace(extraProps: Partial<React.ComponentProps<typeof OrderWo
   );
 }
 
+function expectCarbonExpandableZebraRows(table: HTMLElement) {
+  const tableBody = table.querySelector("tbody");
+  expect(tableBody).not.toBeNull();
+
+  const parentRows = Array.from(tableBody!.children).filter((row) => row.hasAttribute("data-parent-row"));
+  const childRows = Array.from(tableBody!.children).filter((row) => row.hasAttribute("data-child-row"));
+
+  expect(table).toHaveClass("cds--data-table--zebra");
+  expect(parentRows.length).toBeGreaterThan(0);
+  expect(childRows).toHaveLength(parentRows.length);
+
+  parentRows.forEach((parentRow) => {
+    expect(parentRow.nextElementSibling).toHaveAttribute("data-child-row", "true");
+  });
+}
+
 describe("OrderWorkspace", () => {
   beforeEach(() => {
     refreshMock.mockClear();
@@ -283,6 +299,8 @@ describe("OrderWorkspace", () => {
     expect(screen.getByText("2개 품목")).toBeInTheDocument();
     expect(screen.getByText("출하계획 3건")).toBeInTheDocument();
     expect(screen.queryByText("실리콘 몰드 P")).not.toBeInTheDocument();
+
+    expectCarbonExpandableZebraRows(screen.getByRole("table", { name: "주문 목록" }));
 
     await user.click(screen.getByRole("button", { name: "O-DSE-26061100010 품목 펼치기" }));
 
