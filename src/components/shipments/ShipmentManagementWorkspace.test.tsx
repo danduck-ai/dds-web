@@ -175,9 +175,9 @@ describe("ShipmentManagementWorkspace", () => {
     expect(screen.getByRole("button", { name: "압출 실리콘 가스켓 S 2026-06-13 출하 실적 입력" })).toBeEnabled();
   });
 
-  test("renders shipment input as disabled for read only executive roles", () => {
+  test("allows executive users to enter shipment records", () => {
     render(<ShipmentManagementWorkspace currentDate="2026-06-13" initialSeed={seed} role="E" />);
 
-    expect(screen.getByRole("button", { name: "압출 실리콘 가스켓 S 2026-06-13 출하 실적 입력" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "압출 실리콘 가스켓 S 2026-06-13 출하 실적 입력" })).toBeEnabled();
   });
 });

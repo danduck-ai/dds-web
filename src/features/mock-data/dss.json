@@ -17,6 +17,22 @@
       "is_active": true
     },
     {
+      "id": "10000000-0000-4000-8000-000000000004",
+      "email": "production-r@dss.local",
+      "display_name": "정하준",
+      "role": "P",
+      "department_code": "R",
+      "is_active": true
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000005",
+      "email": "production-p@dss.local",
+      "display_name": "최유나",
+      "role": "P",
+      "department_code": "P",
+      "is_active": true
+    },
+    {
       "id": "10000000-0000-4000-8000-000000000003",
       "email": "executive@dss.local",
       "display_name": "이서연",

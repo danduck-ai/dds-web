@@ -52,6 +52,24 @@ describe("AppShell", () => {
     expect(screen.getByText("현장직")).toBeInTheDocument();
   });
 
+  test("shows every navigation item for executive users", () => {
+    render(
+      <AppShell profile={{ displayName: "이서연", email: "executive@dss.local", role: "E" }}>
+        <div>content</div>
+      </AppShell>,
+    );
+
+    expect(screen.getByRole("link", { name: "주문 접수" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "주문 현황" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "생산 계획" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "생산 결과" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "출하 관리" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "재고 관리" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "설계 관리" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "고객 관리" })).toBeInTheDocument();
+    expect(screen.getByText("임원")).toBeInTheDocument();
+  });
+
   test("marks the current navigation item as selected", () => {
     render(
       <AppShell

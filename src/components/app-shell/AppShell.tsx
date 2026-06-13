@@ -47,17 +47,19 @@ type MenuItem = {
   icon: typeof ListChecked;
 };
 
+const fullAccessMenu: MenuItem[] = [
+  { href: "/orders/intake", label: "주문 접수", icon: DocumentAdd },
+  { href: "/orders", label: "주문 현황", icon: ListChecked },
+  { href: "/production/product-status", label: "생산 계획", icon: ChartLineData },
+  { href: "/production/product-management", label: "생산 결과", icon: Result },
+  { href: "/shipments", label: "출하 관리", icon: DeliveryTruck },
+  { href: "/inventory", label: "재고 관리", icon: InventoryManagement },
+  { href: "/reference/designs", label: "설계 관리", icon: Product },
+  { href: "/reference/customers", label: "고객 관리", icon: UserMultiple },
+];
+
 const menuByRole: Record<AppRole, MenuItem[]> = {
-  A: [
-    { href: "/orders/intake", label: "주문 접수", icon: DocumentAdd },
-    { href: "/orders", label: "주문 현황", icon: ListChecked },
-    { href: "/production/product-status", label: "생산 계획", icon: ChartLineData },
-    { href: "/production/product-management", label: "생산 결과", icon: Result },
-    { href: "/shipments", label: "출하 관리", icon: DeliveryTruck },
-    { href: "/inventory", label: "재고 관리", icon: InventoryManagement },
-    { href: "/reference/designs", label: "설계 관리", icon: Product },
-    { href: "/reference/customers", label: "고객 관리", icon: UserMultiple },
-  ],
+  A: fullAccessMenu,
   P: [
     { href: "/orders", label: "주문 현황", icon: ListChecked },
     { href: "/production/product-status", label: "생산 계획", icon: ChartLineData },
@@ -65,15 +67,7 @@ const menuByRole: Record<AppRole, MenuItem[]> = {
     { href: "/shipments", label: "출하 관리", icon: DeliveryTruck },
     { href: "/inventory", label: "재고 관리", icon: InventoryManagement },
   ],
-  E: [
-    { href: "/orders", label: "주문 현황", icon: ListChecked },
-    { href: "/production/product-status", label: "생산 계획", icon: ChartLineData },
-    { href: "/production/product-management", label: "생산 결과", icon: Result },
-    { href: "/shipments", label: "출하 관리", icon: DeliveryTruck },
-    { href: "/inventory", label: "재고 관리", icon: InventoryManagement },
-    { href: "/reference/designs", label: "설계 관리", icon: Product },
-    { href: "/reference/customers", label: "고객 관리", icon: UserMultiple },
-  ],
+  E: fullAccessMenu,
 };
 
 function pathnameOf(value: string) {

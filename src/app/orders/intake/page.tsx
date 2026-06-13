@@ -4,6 +4,7 @@ import { AppShell } from "@/components/app-shell/AppShell";
 import { OrderWorkspace } from "@/components/orders/OrderWorkspace";
 import { listOrders } from "@/features/orders/data";
 import { listOrderFormLookups } from "@/features/reference/data";
+import { hasFullAccess } from "@/lib/auth/permissions";
 import { getCurrentProfile } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,7 @@ export default async function OrderIntakePage() {
     redirect("/login");
   }
 
-  if (profile.role !== "A") {
+  if (!hasFullAccess(profile.role)) {
     redirect("/orders");
   }
 
