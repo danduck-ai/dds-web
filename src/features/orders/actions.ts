@@ -11,18 +11,9 @@ type OrderMutationRow = {
   received_by: string;
 };
 
-type ProductionPlanMutationRow = {
-  quantity: null;
-  completed_quantity: 0;
-  estimated_duration_minutes: null;
-  duration_source: null;
-  work_status: "unscheduled";
-};
-
 type ShipmentPlanMutationRow = {
   planned_ship_date: string;
   quantity: number;
-  production_plan: ProductionPlanMutationRow;
 };
 
 type OrderProductMutationRow = {
@@ -84,13 +75,6 @@ export function buildCreateOrderMutation(
       shipment_plans: product.shipmentPlans.map((plan) => ({
         planned_ship_date: plan.plannedShipDate,
         quantity: plan.quantity,
-        production_plan: {
-          quantity: null,
-          completed_quantity: 0,
-          estimated_duration_minutes: null,
-          duration_source: null,
-          work_status: "unscheduled",
-        },
       })),
     })),
   };

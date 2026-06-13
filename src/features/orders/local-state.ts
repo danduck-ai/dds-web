@@ -78,18 +78,6 @@ function nextOrderIdentity(orders: OrderListRow[], customerTicker: string) {
   };
 }
 
-function createProductionDraft(shipmentPlanId: string) {
-  return {
-    id: `${shipmentPlanId}-production-draft`,
-    shipmentPlanId,
-    quantity: null,
-    completedQuantity: 0,
-    estimatedDurationMinutes: null,
-    durationSource: null,
-    workStatus: "unscheduled" as const,
-  };
-}
-
 function buildShipmentPlanRecord({
   plan,
   existingPlan,
@@ -110,7 +98,6 @@ function buildShipmentPlanRecord({
     plannedShipDate: plan.plannedShipDate,
     quantity: plan.quantity,
     status: existingPlan?.status ?? "ready",
-    productionPlans: existingPlan?.productionPlans ?? [createProductionDraft(id)],
   };
 }
 

@@ -19,7 +19,7 @@ describe("order data loaders", () => {
     expect(rows[0].createdAt >= rows[1].createdAt).toBe(true);
   });
 
-  test("maps order codes, multiple products, shipment plans, and production drafts", async () => {
+  test("maps order codes, multiple products, and shipment plans without production drafts", async () => {
     const rows = await listOrders("active");
     const multiProductOrder = rows.find((row) => row.products.length > 1);
 
@@ -30,8 +30,8 @@ describe("order data loaders", () => {
     );
     expect(
       multiProductOrder?.products.flatMap((product) =>
-        product.shipmentPlans.flatMap((plan) => plan.productionPlans),
+        product.shipmentPlans.filter((plan) => "productionPlans" in plan),
       ),
-    ).toSatisfy((productionPlans: unknown[]) => productionPlans.length > 0);
+    ).toEqual([]);
   });
 });

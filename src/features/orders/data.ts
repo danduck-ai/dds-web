@@ -3,9 +3,6 @@ import type {
   OrderProductRecord,
   OrderRecord,
   OrderStatus,
-  ProductionDurationSource,
-  ProductionPlanRecord,
-  ProductionWorkStatus,
   ShipmentPlanRecord,
   ShipmentStatus,
 } from "./types";
@@ -76,19 +73,6 @@ type MockShipmentPlanRow = {
   status: string;
 };
 
-type MockProductionPlanRow = {
-  id: string;
-  shipment_plan_id: string;
-  quantity: number | null;
-  completed_quantity: number;
-  estimated_duration_minutes: number | null;
-  duration_source: string | null;
-  work_status: string;
-  available_from_date?: string | null;
-  production_date?: string | null;
-  sequence?: number | null;
-};
-
 type MockData = {
   customers: MockCustomerRow[];
   contacts: MockContactRow[];
@@ -97,7 +81,6 @@ type MockData = {
   delivery_schedules: MockDeliveryScheduleRow[];
   order_products?: MockOrderProductRow[];
   shipment_plans?: MockShipmentPlanRow[];
-  production_plans?: MockProductionPlanRow[];
 };
 
 const dssData = mockData as unknown as MockData;
@@ -113,18 +96,6 @@ function asDepartmentCode(value: string | undefined): DepartmentCode {
 
 function asShipmentStatus(value: string | undefined): ShipmentStatus {
   return value === "partial" || value === "completed" || value === "stopped" ? value : "ready";
-}
-
-function asProductionDurationSource(value: string | null): ProductionDurationSource | null {
-  return value === "product_default" || value === "manual_override" ? value : null;
-}
-
-function asProductionWorkStatus(value: string | undefined): ProductionWorkStatus {
-  if (value === "scheduled" || value === "producing" || value === "completed") {
-    return value;
-  }
-
-  return "unscheduled";
 }
 
 function fallbackCustomerTicker(customer: MockCustomerRow | undefined) {
@@ -145,45 +116,12 @@ function deriveOrderCode(order: MockOrderRow, customer: MockCustomerRow | undefi
   return `O-${fallbackCustomerTicker(customer)}-${datePart}${sequencePart.padStart(5, "0").slice(-5)}`;
 }
 
-function mapProductionPlanRow(row: MockProductionPlanRow): ProductionPlanRecord {
-  return {
-    id: row.id,
-    shipmentPlanId: row.shipment_plan_id,
-    quantity: row.quantity,
-    completedQuantity: row.completed_quantity,
-    estimatedDurationMinutes: row.estimated_duration_minutes,
-    durationSource: asProductionDurationSource(row.duration_source),
-    workStatus: asProductionWorkStatus(row.work_status),
-    availableFromDate: row.available_from_date ?? null,
-    productionDate: row.production_date ?? null,
-    sequence: row.sequence ?? undefined,
-  };
-}
-
-function createDraftProductionPlan(shipmentPlanId: string): ProductionPlanRecord {
-  return {
-    id: `${shipmentPlanId}-production-draft`,
-    shipmentPlanId,
-    quantity: null,
-    completedQuantity: 0,
-    estimatedDurationMinutes: null,
-    durationSource: null,
-    workStatus: "unscheduled",
-  };
-}
-
-function mapShipmentPlanRow(
-  row: MockShipmentPlanRow,
-  productionPlansByShipmentId: Map<string, ProductionPlanRecord[]>,
-): ShipmentPlanRecord {
-  const productionPlans = productionPlansByShipmentId.get(row.id) ?? [createDraftProductionPlan(row.id)];
-
+function mapShipmentPlanRow(row: MockShipmentPlanRow): ShipmentPlanRecord {
   return {
     id: row.id,
     plannedShipDate: row.planned_ship_date,
     quantity: row.quantity,
     status: asShipmentStatus(row.status),
-    productionPlans,
   };
 }
 
@@ -195,7 +133,6 @@ function createFallbackShipmentPlan(schedule: MockDeliveryScheduleRow): Shipment
     plannedShipDate: schedule.scheduled_date,
     quantity: schedule.quantity,
     status: "ready",
-    productionPlans: [createDraftProductionPlan(id)],
   };
 }
 
@@ -281,19 +218,11 @@ function listMockOrders(filterOrder: (order: MockOrderRow) => boolean) {
   const customerById = new Map(dssData.customers.map((customer) => [customer.id, customer]));
   const contactById = new Map(dssData.contacts.map((contact) => [contact.id, contact]));
   const designById = new Map(dssData.designs.map((design) => [design.id, design]));
-  const productionPlansByShipmentId = new Map<string, ProductionPlanRecord[]>();
-
-  for (const plan of dssData.production_plans ?? []) {
-    const current = productionPlansByShipmentId.get(plan.shipment_plan_id) ?? [];
-    current.push(mapProductionPlanRow(plan));
-    productionPlansByShipmentId.set(plan.shipment_plan_id, current);
-  }
-
   const shipmentPlansByProductId = new Map<string, ShipmentPlanRecord[]>();
 
   for (const plan of dssData.shipment_plans ?? []) {
     const current = shipmentPlansByProductId.get(plan.order_product_id) ?? [];
-    current.push(mapShipmentPlanRow(plan, productionPlansByShipmentId));
+    current.push(mapShipmentPlanRow(plan));
     shipmentPlansByProductId.set(plan.order_product_id, current);
   }
 

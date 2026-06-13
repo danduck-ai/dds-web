@@ -53,17 +53,6 @@ function product({
         plannedShipDate: plan.plannedShipDate,
         quantity: plan.quantity,
         status: "ready" as const,
-        productionPlans: [
-          {
-            id: `${shipmentPlanId}-production-draft`,
-            shipmentPlanId,
-            quantity: null,
-            completedQuantity: 0,
-            estimatedDurationMinutes: null,
-            durationSource: null,
-            workStatus: "unscheduled" as const,
-          },
-        ],
       };
     }),
   };

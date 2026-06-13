@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vitest";
 
 import { listOrderStatusRows } from "@/features/orders/data";
-import { createProductionPlanningCards } from "@/features/production/planning";
+import { listDailyProductionSeed } from "@/features/production/daily-seed";
+import { createDailyProductionPlanningCards } from "@/features/production/daily-planning";
 import mockData from "./dss.json";
 
 describe("DSS mock data", () => {
@@ -51,7 +52,7 @@ describe("DSS mock data", () => {
     }
   });
 
-  test("provides a target-model multi-product order with production drafts per shipment plan", () => {
+  test("provides a target-model multi-product order without production drafts", () => {
     const orderProducts = mockData.order_products.filter(
       (product) => product.order_id === "40000000-0000-4000-8000-000000000002",
     );
@@ -61,22 +62,10 @@ describe("DSS mock data", () => {
 
     expect(orderProducts).toHaveLength(2);
     expect(shipmentPlans.reduce((sum, plan) => sum + plan.quantity, 0)).toBe(900);
-
-    for (const shipmentPlan of shipmentPlans) {
-      const drafts = mockData.production_plans.filter((plan) => plan.shipment_plan_id === shipmentPlan.id);
-
-      expect(drafts).toHaveLength(1);
-      expect(drafts[0]).toMatchObject({
-        quantity: null,
-        completed_quantity: 0,
-        estimated_duration_minutes: null,
-        duration_source: null,
-        work_status: "unscheduled",
-      });
-    }
+    expect("production_plans" in mockData).toBe(false);
   });
 
-  test("keeps target-model product, shipment, and production plan quantities consistent", () => {
+  test("keeps target-model product and shipment plan quantities consistent", () => {
     for (const product of mockData.order_products) {
       const shipmentPlans = mockData.shipment_plans.filter((plan) => plan.order_product_id === product.id);
       const shipmentTotal = shipmentPlans.reduce((sum, plan) => sum + plan.quantity, 0);
@@ -84,31 +73,13 @@ describe("DSS mock data", () => {
       expect(shipmentPlans.length, `${product.id} shipment plans`).toBeGreaterThan(0);
       expect(shipmentTotal, `${product.id} shipment total`).toBe(product.quantity);
     }
-
-    for (const shipmentPlan of mockData.shipment_plans) {
-      const productionPlans = mockData.production_plans.filter((plan) => plan.shipment_plan_id === shipmentPlan.id);
-      const productionTotal = productionPlans.reduce((sum, plan) => sum + (plan.quantity ?? 0), 0);
-
-      expect(productionPlans.length, `${shipmentPlan.id} production plans`).toBeGreaterThan(0);
-      expect(productionTotal, `${shipmentPlan.id} production total`).toBeLessThanOrEqual(shipmentPlan.quantity);
-
-      for (const productionPlan of productionPlans) {
-        if (productionPlan.quantity === null) {
-          expect(productionPlan.estimated_duration_minutes, productionPlan.id).toBeNull();
-          expect(productionPlan.duration_source, productionPlan.id).toBeNull();
-        } else {
-          expect(productionPlan.quantity, productionPlan.id).toBeGreaterThan(0);
-          expect(productionPlan.estimated_duration_minutes, productionPlan.id).toBeGreaterThan(0);
-          expect(productionPlan.completed_quantity, productionPlan.id).toBeLessThanOrEqual(productionPlan.quantity);
-        }
-      }
-    }
   });
 
-  test("feeds production planning with varied released cards across departments and dates", async () => {
+  test("feeds daily production planning with OrderProduct candidates and seeded day plans", async () => {
     const orders = await listOrderStatusRows();
-    const cardsFor = (departmentCode: "R" | "S" | "P", productionDate = "2026-06-12") =>
-      createProductionPlanningCards(orders, {
+    const seed = await listDailyProductionSeed();
+    const cardsFor = (departmentCode: "R" | "S" | "P", productionDate = "2026-06-13") =>
+      createDailyProductionPlanningCards(seed, {
         departmentCode,
         productionDate,
       });
@@ -116,15 +87,15 @@ describe("DSS mock data", () => {
     const rCards = cardsFor("R");
     const sCards = cardsFor("S");
     const pCards = cardsFor("P");
-    const sCardsTomorrow = cardsFor("S", "2026-06-13");
 
-    expect(rCards.length).toBeGreaterThanOrEqual(5);
+    expect(orders.some((order) => order.status === "released")).toBe(true);
+    expect(rCards.length).toBeGreaterThanOrEqual(2);
     expect(sCards.length).toBeGreaterThanOrEqual(1);
-    expect(pCards.length).toBeGreaterThanOrEqual(3);
+    expect(pCards.length).toBeGreaterThanOrEqual(1);
 
-    expect(rCards.some((card) => card.productionDate === "2026-06-12" && card.sequence === 1)).toBe(true);
-    expect(rCards.some((card) => card.quantity === null && card.remainingQuantity === 120)).toBe(true);
-    expect(sCardsTomorrow.some((card) => card.availableFromDate === "2026-06-13")).toBe(true);
+    expect(rCards.some((card) => card.productionDate === "2026-06-13" && card.sequence === 1)).toBe(true);
+    expect(rCards.some((card) => card.quantity === null && card.remainingQuantity > 0)).toBe(true);
     expect(pCards.some((card) => card.workStatus === "producing" && card.quantity !== null)).toBe(true);
+    expect(rCards.every((card) => !("shipmentPlanId" in card))).toBe(true);
   });
 });

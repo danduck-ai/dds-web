@@ -46,7 +46,7 @@ describe("buildCreateOrderMutation", () => {
     expect(result.fieldErrors?.products).toContain("출하계획 수량 합계");
   });
 
-  test("creates order, product, shipment plan, and empty production plan payloads", () => {
+  test("creates order, product, and shipment plan payloads without production drafts", () => {
     const result = buildCreateOrderMutation(form, "profile-1");
 
     if (!result.ok) {
@@ -69,24 +69,10 @@ describe("buildCreateOrderMutation", () => {
           {
             planned_ship_date: "2026-06-18",
             quantity: 300,
-            production_plan: {
-              quantity: null,
-              completed_quantity: 0,
-              estimated_duration_minutes: null,
-              duration_source: null,
-              work_status: "unscheduled",
-            },
           },
           {
             planned_ship_date: "2026-06-25",
             quantity: 200,
-            production_plan: {
-              quantity: null,
-              completed_quantity: 0,
-              estimated_duration_minutes: null,
-              duration_source: null,
-              work_status: "unscheduled",
-            },
           },
         ],
       },

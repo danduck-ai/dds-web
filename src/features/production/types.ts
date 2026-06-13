@@ -1,62 +1,111 @@
-import type { DepartmentCode, ProductionWorkStatus } from "@/features/orders/types";
+import type { DepartmentCode } from "@/features/orders/types";
 
-export type ProductionPlanCard = {
+export type DailyProductionDurationSource = "product_default" | "manual_override";
+
+export type DailyProductionWorkStatus = "planned" | "producing" | "completed" | "cancelled";
+
+export type DailyProductionCandidate = {
   id: string;
-  productionPlanId: string;
-  shipmentPlanId: string;
+  orderProductId: string;
+  orderId: string;
+  orderNo: string;
+  orderStatus: string;
+  customerName: string;
+  designNo: string;
+  productName: string;
+  specification: string;
+  departmentCode: DepartmentCode;
+  orderQuantity: number;
+  defaultUnitsPerHour: number;
+  nextShipDate: string;
+  shipmentSummary: string;
+};
+
+export type DailyProductionSeedItem = {
+  id: string;
+  productionDate: string;
+  departmentCode: DepartmentCode;
+  workStartTime: string;
+  orderProductId: string;
+  quantity: number;
+  completedQuantity: number;
+  estimatedDurationMinutes: number;
+  durationSource: DailyProductionDurationSource;
+  workStatus: DailyProductionWorkStatus;
+  sequence: number;
+};
+
+export type DailyProductionSeed = {
+  candidates: DailyProductionCandidate[];
+  dayPlanItems: DailyProductionSeedItem[];
+};
+
+export type DailyProductionCard = {
+  id: string;
+  orderProductId: string;
   orderNo: string;
   customerName: string;
   designNo: string;
   productName: string;
   specification: string;
   departmentCode: DepartmentCode;
-  plannedShipDate: string;
-  shipmentQuantity: number;
+  orderQuantity: number;
+  plannedQuantity: number;
   remainingQuantity: number;
   defaultUnitsPerHour: number;
+  nextShipDate: string;
+  shipmentSummary: string;
   quantity: number | null;
+  completedQuantity: number;
   estimatedDurationMinutes: number | null;
-  workStatus: ProductionWorkStatus;
-  availableFromDate?: string | null;
+  durationSource: DailyProductionDurationSource | null;
+  workStatus: DailyProductionWorkStatus;
   productionDate?: string | null;
   sequence?: number;
-  sourceProductionPlanId?: string;
+  sourceOrderProductId?: string;
 };
 
-export type CardFilterOptions = {
+export type DailyPlanningCardFilterOptions = {
   departmentCode: DepartmentCode;
   productionDate: string;
 };
 
-export type ConfirmationOptions = {
+export type DailyConfirmationOptions = {
   productionDate: string;
   departmentCode: DepartmentCode;
   workStartTime: string;
 };
 
-export type ProductionPlanAssignment = {
-  productionPlanId: string;
+export type DailyProductionPlanItem = {
+  id: string;
+  orderProductId: string;
   productionDate: string;
   departmentCode: DepartmentCode;
   sequence: number;
   startTime: string;
   endTime: string;
   quantity: number;
+  completedQuantity: number;
   estimatedDurationMinutes: number;
+  durationSource: DailyProductionDurationSource;
+  workStatus: DailyProductionWorkStatus;
 };
 
-export type ConfirmationResult =
+export type DailyProductionDayPlan = {
+  id: string;
+  productionDate: string;
+  departmentCode: DepartmentCode;
+  workStartTime: string;
+  items: DailyProductionPlanItem[];
+};
+
+export type DailyConfirmationResult =
   | {
       ok: true;
-      assignments: ProductionPlanAssignment[];
+      dayPlan: DailyProductionDayPlan;
     }
   | {
       ok: false;
       error: string;
-      assignments: [];
+      dayPlan: null;
     };
-
-export type DeferCardResult = {
-  visibleCards: ProductionPlanCard[];
-  deferredCard: ProductionPlanCard | null;
-};

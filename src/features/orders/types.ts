@@ -6,10 +6,6 @@ export type DepartmentCode = "R" | "S" | "P";
 
 export type ShipmentStatus = "ready" | "partial" | "completed" | "stopped";
 
-export type ProductionDurationSource = "product_default" | "manual_override";
-
-export type ProductionWorkStatus = "unscheduled" | "scheduled" | "producing" | "completed";
-
 export type ShipmentPlanInput = {
   plannedShipDate: string;
   quantity: number;
@@ -51,25 +47,11 @@ export type OrderRecord = {
   completedAt: string | null;
 };
 
-export type ProductionPlanRecord = {
-  id: string;
-  shipmentPlanId: string;
-  quantity: number | null;
-  completedQuantity: number;
-  estimatedDurationMinutes: number | null;
-  durationSource: ProductionDurationSource | null;
-  workStatus: ProductionWorkStatus;
-  availableFromDate?: string | null;
-  productionDate?: string | null;
-  sequence?: number;
-};
-
 export type ShipmentPlanRecord = {
   id: string;
   plannedShipDate: string;
   quantity: number;
   status: ShipmentStatus;
-  productionPlans: ProductionPlanRecord[];
 };
 
 export type OrderProductRecord = {

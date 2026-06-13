@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import ProductionPlansPage from "./page";
+import DailyProductionPlansPage from "./page";
 
-const { getCurrentProfileMock, listOrderStatusRowsMock, redirectMock } = vi.hoisted(() => ({
+const { getCurrentProfileMock, listDailyProductionSeedMock, redirectMock } = vi.hoisted(() => ({
   getCurrentProfileMock: vi.fn(),
-  listOrderStatusRowsMock: vi.fn(),
+  listDailyProductionSeedMock: vi.fn(),
   redirectMock: vi.fn((path: string) => {
     throw new Error(`redirect:${path}`);
   }),
@@ -19,8 +19,8 @@ vi.mock("@/lib/auth/session", () => ({
   getCurrentProfile: getCurrentProfileMock,
 }));
 
-vi.mock("@/features/orders/data", () => ({
-  listOrderStatusRows: listOrderStatusRowsMock,
+vi.mock("@/features/production/daily-seed", () => ({
+  listDailyProductionSeed: listDailyProductionSeedMock,
 }));
 
 vi.mock("@/components/app-shell/AppShell", () => ({
@@ -29,8 +29,8 @@ vi.mock("@/components/app-shell/AppShell", () => ({
   ),
 }));
 
-vi.mock("@/components/production/ProductionPlanningWorkspace", () => ({
-  ProductionPlanningWorkspace: ({
+vi.mock("@/components/production/DailyProductionPlanWorkspace", () => ({
+  DailyProductionPlanWorkspace: ({
     currentDate,
     profile,
   }: {
@@ -38,29 +38,29 @@ vi.mock("@/components/production/ProductionPlanningWorkspace", () => ({
     profile: { departmentCode?: string | null };
   }) => (
     <div>
-      <span>생산계획 워크스페이스</span>
+      <span>일간 생산 계획표 워크스페이스</span>
       <span>{currentDate}</span>
       <span>{profile.departmentCode}</span>
     </div>
   ),
 }));
 
-describe("ProductionPlansPage", () => {
+describe("DailyProductionPlansPage", () => {
   beforeEach(() => {
     redirectMock.mockClear();
     getCurrentProfileMock.mockReset();
-    listOrderStatusRowsMock.mockReset();
+    listDailyProductionSeedMock.mockReset();
   });
 
   test("redirects anonymous users to login", async () => {
     getCurrentProfileMock.mockResolvedValue(null);
 
-    await expect(ProductionPlansPage()).rejects.toThrow("redirect:/login");
+    await expect(DailyProductionPlansPage()).rejects.toThrow("redirect:/login");
 
     expect(redirectMock).toHaveBeenCalledWith("/login");
   });
 
-  test("renders production planning workspace with profile department", async () => {
+  test("renders daily production planning workspace with seeded frontend data", async () => {
     getCurrentProfileMock.mockResolvedValue({
       id: "profile-1",
       displayName: "박현우",
@@ -68,12 +68,12 @@ describe("ProductionPlansPage", () => {
       role: "P",
       departmentCode: "S",
     });
-    listOrderStatusRowsMock.mockResolvedValue([]);
+    listDailyProductionSeedMock.mockResolvedValue({ candidates: [], dayPlans: [] });
 
-    render(await ProductionPlansPage());
+    render(await DailyProductionPlansPage());
 
-    expect(screen.getByText("생산계획 워크스페이스")).toBeInTheDocument();
+    expect(screen.getByText("일간 생산 계획표 워크스페이스")).toBeInTheDocument();
     expect(screen.getByText("S")).toBeInTheDocument();
-    expect(listOrderStatusRowsMock).toHaveBeenCalled();
+    expect(listDailyProductionSeedMock).toHaveBeenCalled();
   });
 });

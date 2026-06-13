@@ -1,26 +1,26 @@
 import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/app-shell/AppShell";
-import { ProductionPlanningWorkspace } from "@/components/production/ProductionPlanningWorkspace";
-import { listOrderStatusRows } from "@/features/orders/data";
+import { DailyProductionPlanWorkspace } from "@/components/production/DailyProductionPlanWorkspace";
+import { listDailyProductionSeed } from "@/features/production/daily-seed";
 import { getCurrentProfile } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProductionPlansPage() {
+export default async function DailyProductionPlansPage() {
   const profile = await getCurrentProfile();
 
   if (!profile) {
     redirect("/login");
   }
 
-  const orders = await listOrderStatusRows();
+  const seed = await listDailyProductionSeed();
 
   return (
-    <AppShell currentPath="/production/plans" profile={profile}>
-      <ProductionPlanningWorkspace
+    <AppShell currentPath="/production/daily-plans" profile={profile}>
+      <DailyProductionPlanWorkspace
         currentDate={new Date().toISOString().slice(0, 10)}
-        initialOrders={orders}
+        initialSeed={seed}
         profile={profile}
       />
     </AppShell>

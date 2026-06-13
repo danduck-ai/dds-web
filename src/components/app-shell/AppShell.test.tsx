@@ -9,7 +9,7 @@ describe("AppShell", () => {
     window.localStorage.clear();
   });
 
-  test("shows order, design, and customer navigation for administrative users", () => {
+  test("shows order, daily production, design, and customer navigation for administrative users", () => {
     render(
       <AppShell profile={{ displayName: "김민정", email: "admin@dss.local", role: "A" }}>
         <div>content</div>
@@ -18,14 +18,15 @@ describe("AppShell", () => {
 
     expect(screen.getByRole("link", { name: "주문 접수" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "주문 현황" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "생산 계획" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "일간 생산 계획표 작성" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "생산 계획" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "설계 관리" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "고객 관리" })).toBeInTheDocument();
     expect(screen.getByText("김민정")).toBeInTheDocument();
     expect(screen.getByText("사무직")).toBeInTheDocument();
   });
 
-  test("shows order and production navigation for production users", () => {
+  test("shows order and daily production navigation for production users", () => {
     render(
       <AppShell profile={{ displayName: "박현우", email: "production@dss.local", role: "P" }}>
         <div>content</div>
@@ -33,7 +34,8 @@ describe("AppShell", () => {
     );
 
     expect(screen.getByRole("link", { name: "주문 현황" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "생산 계획" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "일간 생산 계획표 작성" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "생산 계획" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "주문 접수" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "설계 관리" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "고객 관리" })).not.toBeInTheDocument();
@@ -54,7 +56,7 @@ describe("AppShell", () => {
     expect(screen.getByRole("link", { name: "설계 관리" })).toHaveClass("cds--side-nav__link--current");
     expect(screen.getByRole("link", { name: "주문 접수" })).not.toHaveAttribute("aria-current");
     expect(screen.getByRole("link", { name: "주문 현황" })).not.toHaveAttribute("aria-current");
-    expect(screen.getByRole("link", { name: "생산 계획" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", { name: "일간 생산 계획표 작성" })).not.toHaveAttribute("aria-current");
   });
 
   test("marks order intake separately from order status", () => {
@@ -84,17 +86,17 @@ describe("AppShell", () => {
     expect(screen.getByRole("link", { name: "주문 현황" })).toHaveAttribute("aria-current", "page");
   });
 
-  test("marks production planning navigation separately", () => {
+  test("marks daily production planning navigation separately", () => {
     render(
       <AppShell
-        currentPath="/production/plans"
+        currentPath="/production/daily-plans"
         profile={{ displayName: "박현우", email: "production@dss.local", role: "P" }}
       >
         <div>content</div>
       </AppShell>,
     );
 
-    expect(screen.getByRole("link", { name: "생산 계획" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "일간 생산 계획표 작성" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: "주문 현황" })).not.toHaveAttribute("aria-current");
   });
 
