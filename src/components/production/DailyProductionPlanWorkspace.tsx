@@ -26,6 +26,7 @@ import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalList
 import { CSS } from "@dnd-kit/utilities";
 import { type CSSProperties, type PointerEvent, useEffect, useMemo, useState } from "react";
 
+import { TOAST_TIMEOUT_MS, ToastStack } from "@/components/notifications/ToastProvider";
 import type { AppRole, DepartmentCode } from "@/features/orders/types";
 import {
   buildDailyConfirmationPlan,
@@ -229,7 +230,7 @@ export function DailyProductionPlanWorkspace({
   initialSeed,
   onSaved,
   profile,
-  toastDurationMs = 3000,
+  toastDurationMs = TOAST_TIMEOUT_MS,
 }: {
   currentDate: string;
   embedded?: boolean;
@@ -537,16 +538,18 @@ export function DailyProductionPlanWorkspace({
       </section>
 
       {successMessage ? (
-        <div className="dss-toast-stack" aria-live="polite">
+        <ToastStack>
           <ToastNotification
             hideCloseButton
             kind="success"
             lowContrast
+            onClose={() => setSuccessMessage("")}
             statusIconDescription="성공"
             subtitle={successMessage}
+            timeout={toastDurationMs}
             title="저장 완료"
           />
-        </div>
+        </ToastStack>
       ) : null}
 
       <section className="dss-production-transfer" aria-label="일간 생산계획 편성">

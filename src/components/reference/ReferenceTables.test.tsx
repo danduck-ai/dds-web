@@ -1,8 +1,13 @@
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
+import { TOAST_TIMEOUT_MS } from "@/components/notifications/ToastProvider";
 import { CustomerReferenceTable, DesignReferenceTable } from "./ReferenceTables";
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe("ReferenceTables", () => {
   test("renders designs as read-only rows", () => {
@@ -73,7 +78,40 @@ describe("ReferenceTables", () => {
     expect(screen.getByText("동성전자")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "신규 고객 입력" }));
 
+    const toastMessage = await screen.findByText("신규 고객사/담당자 등록 기능은 추후 개발 예정입니다.");
+    const toastStack = toastMessage.closest(".dss-toast-stack");
+
+    expect(toastMessage).toBeInTheDocument();
+    expect(toastStack?.parentElement).toBe(document.body);
+    expect(document.querySelector(".dss-page .dss-toast-stack")).not.toBeInTheDocument();
+  });
+
+  test("dismisses future-scope toasts after the Carbon recommended timeout", async () => {
+    vi.useFakeTimers();
+
+    render(
+      <CustomerReferenceTable
+        rows={[
+          {
+            id: "customer-1",
+            name: "동성전자",
+            identifier: "DS-ELEC",
+            businessRegistrationNo: "101-81-00001",
+            contactSummary: "김영수 / 010-1000-1001",
+          },
+        ]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "신규 고객 입력" }));
+
     expect(screen.getByText("신규 고객사/담당자 등록 기능은 추후 개발 예정입니다.")).toBeInTheDocument();
+
+    await act(async () => {
+      vi.advanceTimersByTime(TOAST_TIMEOUT_MS);
+    });
+
+    expect(screen.queryByText("신규 고객사/담당자 등록 기능은 추후 개발 예정입니다.")).not.toBeInTheDocument();
   });
 
   test("filters customers with the Carbon table search", async () => {

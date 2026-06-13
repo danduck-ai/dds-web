@@ -16,19 +16,22 @@ import {
 } from "@carbon/react";
 import { useState } from "react";
 
+import { TOAST_TIMEOUT_MS, ToastStack } from "@/components/notifications/ToastProvider";
 import type { CustomerTableRow, DesignTableRow } from "@/features/reference/data";
 
-function FutureToast({ message }: { message: string }) {
+function FutureToast({ message, onClose }: { message: string; onClose: () => void }) {
   return (
-    <div className="dss-toast-stack" aria-live="polite">
+    <ToastStack>
       <ToastNotification
         hideCloseButton
         kind="info"
         lowContrast
+        onClose={onClose}
         statusIconDescription="정보"
+        timeout={TOAST_TIMEOUT_MS}
         title={message}
       />
-    </div>
+    </ToastStack>
   );
 }
 
@@ -51,7 +54,7 @@ export function DesignReferenceTable({ rows }: { rows: DesignTableRow[] }) {
 
   return (
     <section className="dss-page">
-      {toast ? <FutureToast message={toast} /> : null}
+      {toast ? <FutureToast message={toast} onClose={() => setToast("")} /> : null}
       <header className="dss-page-header">
         <div>
           <h1>설계 관리</h1>
@@ -127,7 +130,7 @@ export function CustomerReferenceTable({ rows }: { rows: CustomerTableRow[] }) {
 
   return (
     <section className="dss-page">
-      {toast ? <FutureToast message={toast} /> : null}
+      {toast ? <FutureToast message={toast} onClose={() => setToast("")} /> : null}
       <header className="dss-page-header">
         <div>
           <h1>고객 관리</h1>

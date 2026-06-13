@@ -30,6 +30,7 @@ import {
   DailyProductionPlanWorkspace,
   type DailyProductionProfile,
 } from "@/components/production/DailyProductionPlanWorkspace";
+import { TOAST_TIMEOUT_MS, ToastStack } from "@/components/notifications/ToastProvider";
 import type { DepartmentCode } from "@/features/orders/types";
 import { getInitialDepartment } from "@/features/production/daily-planning";
 import {
@@ -560,7 +561,7 @@ export function ProductProductionStatusWorkspace({
 
     const timeoutId = window.setTimeout(() => {
       setDailyPlanningToast("");
-    }, 3000);
+    }, TOAST_TIMEOUT_MS);
 
     return () => window.clearTimeout(timeoutId);
   }, [dailyPlanningToast]);
@@ -568,16 +569,18 @@ export function ProductProductionStatusWorkspace({
   return (
     <main className="dss-page dss-product-status-page">
       {dailyPlanningToast ? (
-        <div className="dss-toast-stack" aria-live="polite">
+        <ToastStack>
           <ToastNotification
             hideCloseButton
             kind="success"
             lowContrast
+            onClose={() => setDailyPlanningToast("")}
             statusIconDescription="성공"
             subtitle={dailyPlanningToast}
+            timeout={TOAST_TIMEOUT_MS}
             title="저장 완료"
           />
-        </div>
+        </ToastStack>
       ) : null}
 
       <header className="dss-page-header">

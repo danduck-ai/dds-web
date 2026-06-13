@@ -15,7 +15,7 @@ import {
 import { ConfirmActionModal } from "./ConfirmActionModal";
 import { OrderDrawer } from "./OrderDrawer";
 import { OrderTable } from "./OrderTable";
-import { ToastMessage, ToastViewport } from "@/components/notifications/ToastProvider";
+import { TOAST_TIMEOUT_MS, ToastMessage, ToastViewport } from "@/components/notifications/ToastProvider";
 
 type OrderWorkspaceMode = "intake" | "status";
 
@@ -95,7 +95,7 @@ export function OrderWorkspace({
     setToasts((current) => [...current, { id, kind, title }]);
     window.setTimeout(() => {
       setToasts((current) => current.filter((toast) => toast.id !== id));
-    }, 3000);
+    }, TOAST_TIMEOUT_MS);
   }
 
   function toggleAll() {

@@ -902,11 +902,11 @@ body {
   position: fixed;
   z-index: 10000;
   inset-block-start: $spacing-05;
-  inset-inline: 50% auto;
+  inset-inline-start: auto;
+  inset-inline-end: $spacing-05;
   display: grid;
   gap: $spacing-03;
-  inline-size: min(92vw, 28rem);
-  transform: translateX(-50%);
+  inline-size: min(calc(100vw - #{$spacing-07}), 18rem);
 }
 
 @media (max-width: 42rem) {
