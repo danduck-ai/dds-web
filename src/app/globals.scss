@@ -986,6 +986,79 @@ body {
   color: $support-error;
 }
 
+.dss-shipment-management-page {
+  display: grid;
+  gap: $spacing-05;
+
+  .dss-page-header {
+    margin-block-end: 0;
+  }
+}
+
+.dss-shipment-management-table {
+  min-inline-size: 62rem;
+
+  strong,
+  span {
+    display: block;
+  }
+}
+
+.dss-shipment-input-drawer {
+  .dss-order-drawer__header {
+    align-items: flex-start;
+
+    p {
+      @include type.type-style("body-compact-01");
+
+      margin: $spacing-02 0 0;
+      color: $text-secondary;
+    }
+  }
+}
+
+.dss-shipment-drawer__summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $spacing-04;
+  margin: 0;
+  padding: $spacing-05;
+  background: $layer;
+  border: 1px solid $border-subtle;
+
+  div {
+    min-inline-size: 0;
+  }
+
+  dt {
+    @include type.type-style("label-01");
+
+    color: $text-secondary;
+  }
+
+  dd {
+    @include type.type-style("body-compact-01");
+
+    margin: $spacing-02 0 0;
+    overflow-wrap: anywhere;
+
+    span {
+      display: block;
+      color: $text-secondary;
+    }
+  }
+}
+
+.dss-shipment-input-form__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $spacing-04;
+}
+
+.dss-shipment-history-table {
+  min-inline-size: 24rem;
+}
+
 .dss-drawer-layer {
   position: fixed;
   z-index: 7000;

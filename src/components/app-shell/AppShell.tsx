@@ -13,6 +13,7 @@ import {
 } from "@carbon/react";
 import {
   ChartLineData,
+  DeliveryTruck,
   DocumentAdd,
   InventoryManagement,
   ListChecked,
@@ -52,6 +53,7 @@ const menuByRole: Record<AppRole, MenuItem[]> = {
     { href: "/orders", label: "주문 현황", icon: ListChecked },
     { href: "/production/product-status", label: "생산 계획", icon: ChartLineData },
     { href: "/production/product-management", label: "생산 결과", icon: Result },
+    { href: "/shipments", label: "출하 관리", icon: DeliveryTruck },
     { href: "/inventory", label: "재고 관리", icon: InventoryManagement },
     { href: "/reference/designs", label: "설계 관리", icon: Product },
     { href: "/reference/customers", label: "고객 관리", icon: UserMultiple },
@@ -60,12 +62,14 @@ const menuByRole: Record<AppRole, MenuItem[]> = {
     { href: "/orders", label: "주문 현황", icon: ListChecked },
     { href: "/production/product-status", label: "생산 계획", icon: ChartLineData },
     { href: "/production/product-management", label: "생산 결과", icon: Result },
+    { href: "/shipments", label: "출하 관리", icon: DeliveryTruck },
     { href: "/inventory", label: "재고 관리", icon: InventoryManagement },
   ],
   E: [
     { href: "/orders", label: "주문 현황", icon: ListChecked },
     { href: "/production/product-status", label: "생산 계획", icon: ChartLineData },
     { href: "/production/product-management", label: "생산 결과", icon: Result },
+    { href: "/shipments", label: "출하 관리", icon: DeliveryTruck },
     { href: "/inventory", label: "재고 관리", icon: InventoryManagement },
     { href: "/reference/designs", label: "설계 관리", icon: Product },
     { href: "/reference/customers", label: "고객 관리", icon: UserMultiple },
