@@ -11,7 +11,16 @@ import {
   SideNavLink,
   Stack,
 } from "@carbon/react";
-import { ChartLineData, DocumentAdd, ListChecked, Logout, Product, UserMultiple } from "@carbon/icons-react";
+import {
+  ChartLineData,
+  DocumentAdd,
+  InventoryManagement,
+  ListChecked,
+  Logout,
+  Product,
+  Result,
+  UserMultiple,
+} from "@carbon/icons-react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
@@ -41,17 +50,23 @@ const menuByRole: Record<AppRole, MenuItem[]> = {
   A: [
     { href: "/orders/intake", label: "주문 접수", icon: DocumentAdd },
     { href: "/orders", label: "주문 현황", icon: ListChecked },
-    { href: "/production/product-status", label: "생산 현황", icon: ChartLineData },
+    { href: "/production/product-status", label: "생산 계획", icon: ChartLineData },
+    { href: "/production/product-management", label: "생산 결과", icon: Result },
+    { href: "/inventory", label: "재고 관리", icon: InventoryManagement },
     { href: "/reference/designs", label: "설계 관리", icon: Product },
     { href: "/reference/customers", label: "고객 관리", icon: UserMultiple },
   ],
   P: [
     { href: "/orders", label: "주문 현황", icon: ListChecked },
-    { href: "/production/product-status", label: "생산 현황", icon: ChartLineData },
+    { href: "/production/product-status", label: "생산 계획", icon: ChartLineData },
+    { href: "/production/product-management", label: "생산 결과", icon: Result },
+    { href: "/inventory", label: "재고 관리", icon: InventoryManagement },
   ],
   E: [
     { href: "/orders", label: "주문 현황", icon: ListChecked },
-    { href: "/production/product-status", label: "생산 현황", icon: ChartLineData },
+    { href: "/production/product-status", label: "생산 계획", icon: ChartLineData },
+    { href: "/production/product-management", label: "생산 결과", icon: Result },
+    { href: "/inventory", label: "재고 관리", icon: InventoryManagement },
     { href: "/reference/designs", label: "설계 관리", icon: Product },
     { href: "/reference/customers", label: "고객 관리", icon: UserMultiple },
   ],

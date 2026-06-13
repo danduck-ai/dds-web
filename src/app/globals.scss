@@ -847,6 +847,145 @@ body {
   gap: $spacing-03;
 }
 
+.dss-production-management-page {
+  display: grid;
+  gap: $spacing-05;
+
+  .dss-page-header {
+    margin-block-end: 0;
+  }
+}
+
+.dss-production-management-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $spacing-04;
+  align-items: end;
+  padding: $spacing-05;
+  background: $layer;
+  border: 1px solid $border-subtle;
+}
+
+.dss-production-management-form__field {
+  min-inline-size: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: $spacing-02;
+  align-items: end;
+
+  .cds--form-item {
+    min-inline-size: 0;
+  }
+}
+
+.dss-production-management-form__field--wide {
+  grid-column: span 2;
+}
+
+.dss-production-management-form--drawer {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+.dss-production-management-field-help {
+  block-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .cds--toggletip-button {
+    color: $text-secondary;
+  }
+}
+
+.dss-production-management-help {
+  .cds--popover-content {
+    max-inline-size: 18rem;
+  }
+
+  p {
+    @include type.type-style("body-compact-01");
+
+    margin: 0;
+  }
+}
+
+.dss-production-management-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.dss-production-management-history-table {
+  strong,
+  span {
+    display: block;
+  }
+}
+
+.dss-production-management-history-table {
+  min-inline-size: 68rem;
+}
+
+.dss-production-management-shipment-table {
+  min-inline-size: 28rem;
+}
+
+.dss-production-management-detail__memo {
+  grid-column: 1 / -1;
+}
+
+.dss-inventory-management-page {
+  display: grid;
+  gap: $spacing-05;
+
+  .dss-page-header {
+    margin-block-end: 0;
+  }
+}
+
+.dss-inventory-status-table {
+  min-inline-size: 42rem;
+
+  strong,
+  span {
+    display: block;
+  }
+}
+
+.dss-inventory-status-table__expanded {
+  padding-block: $spacing-05;
+}
+
+.dss-inventory-storage-table {
+  min-inline-size: 24rem;
+  max-inline-size: 36rem;
+}
+
+.dss-inventory-ledger-table {
+  min-inline-size: 42rem;
+
+  strong,
+  span {
+    display: block;
+  }
+}
+
+.dss-inventory-ledger-table__quantity {
+  font-weight: 600;
+}
+
+.dss-inventory-ledger-table__quantity--inbound {
+  color: $support-success;
+}
+
+.dss-inventory-ledger-table__quantity--outbound {
+  color: $support-error;
+}
+
 .dss-drawer-layer {
   position: fixed;
   z-index: 7000;
@@ -863,6 +1002,19 @@ body {
   grid-template-rows: auto minmax(0, 1fr) auto;
   background: $background;
   box-shadow: -$spacing-03 0 $spacing-05 rgba(0, 0, 0, 0.18);
+}
+
+.dss-production-receipt-drawer {
+  .dss-order-drawer__header {
+    align-items: flex-start;
+
+    p {
+      @include type.type-style("body-compact-01");
+
+      margin: $spacing-02 0 0;
+      color: $text-secondary;
+    }
+  }
 }
 
 .dss-order-drawer__header,
@@ -938,8 +1090,14 @@ body {
   .dss-production-scheduled-card,
   .dss-production-quantity-modal__meta,
   .dss-product-status-drawer__summary,
-  .dss-product-status-drawer__form {
+  .dss-product-status-drawer__form,
+  .dss-production-management-form {
     grid-template-columns: 1fr;
+  }
+
+  .dss-production-management-form__field,
+  .dss-production-management-form__field--wide {
+    grid-column: auto;
   }
 
   .dss-production-controls {

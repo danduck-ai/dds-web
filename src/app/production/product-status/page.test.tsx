@@ -40,7 +40,7 @@ vi.mock("@/components/production/ProductProductionStatusWorkspace", () => ({
     profile: { departmentCode?: string | null };
   }) => (
     <div>
-      <span>제품별 생산 현황 워크스페이스</span>
+      <span>제품별 생산 계획 워크스페이스</span>
       <span>{currentDate}</span>
       <span>{initialSeed.candidates.length}</span>
       <span>{profile.departmentCode}</span>
@@ -63,7 +63,7 @@ describe("ProductProductionStatusPage", () => {
     expect(redirectMock).toHaveBeenCalledWith("/login");
   });
 
-  test("renders product production status workspace with seeded frontend data", async () => {
+  test("renders product production planning workspace with seeded frontend data", async () => {
     getCurrentProfileMock.mockResolvedValue({
       id: "profile-1",
       displayName: "박현우",
@@ -75,7 +75,7 @@ describe("ProductProductionStatusPage", () => {
 
     render(await ProductProductionStatusPage());
 
-    expect(screen.getByText("제품별 생산 현황 워크스페이스")).toBeInTheDocument();
+    expect(screen.getByText("제품별 생산 계획 워크스페이스")).toBeInTheDocument();
     expect(screen.getByText("1")).toBeInTheDocument();
     expect(screen.getByText("S")).toBeInTheDocument();
     expect(listDailyProductionSeedMock).toHaveBeenCalled();
