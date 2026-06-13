@@ -820,6 +820,10 @@ body {
   display: grid;
   gap: $spacing-05;
 
+  > .cds--data-table-container {
+    min-inline-size: 0;
+  }
+
   .dss-page-header {
     margin-block-end: 0;
   }

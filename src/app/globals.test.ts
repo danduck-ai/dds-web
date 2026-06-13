@@ -14,3 +14,11 @@ describe("global toast positioning", () => {
     expect(styles).not.toMatch(/\.dss-toast-stack\s*{[\s\S]*translateX\(-50%\)/);
   });
 });
+
+describe("production management table layout", () => {
+  test("allows the history table container to shrink inside the page gutter", () => {
+    expect(styles).toMatch(
+      /\.dss-production-management-page\s*{[\s\S]*>\s*\.cds--data-table-container\s*{[\s\S]*min-inline-size:\s*0/,
+    );
+  });
+});
