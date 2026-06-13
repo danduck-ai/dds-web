@@ -9,7 +9,7 @@
 ## 상태
 
 - 작성일: 2026-06-13
-- 기준 방향: 제품 단위 생산 재고 모델
+- 기준 방향: 주문제품 단위 생산계획 및 재고 분리 모델
 - 이 문서는 기존 `ProductionPlan -> ProductionDayPlan` 흐름을 대체하는 새 방향이다.
 - 레거시 DB 스키마나 과거 테이블 구조는 이 문서의 판단 근거로 사용하지 않는다.
 - 생산과 출하 데이터 구조를 설계할 때는 기존 `docs/order_data_model.md`보다 이 문서를 우선한다.
@@ -18,7 +18,9 @@
 
 생산은 특정 출하계획에 묶지 않는다.
 
-주문 제품(`OrderProduct`) 단위로 생산하고, 완료된 생산량은 해당 주문 제품의 생산 완료 재고처럼 본다. 출하는 나중에 이 완료 생산량에서 차감한다.
+주문 제품(`OrderProduct`) 단위로 생산계획을 작성한다. 생산계획은 계획 수량과 일정만 관리하고, 실제 생산 완료와 재고 수량의 source of truth가 되지 않는다.
+
+생산 완료는 별도 `[생산 결과]` 메뉴의 생산 입고 원장에서 입력하고, 재고 조회와 입출고 흐름은 `[재고 관리]` 메뉴에서 확인한다. 출하는 나중에 이 재고 원장에서 FIFO 기준으로 차감한다.
 
 따라서 다음 개념은 만들지 않는다.
 
@@ -27,6 +29,8 @@
 - `ProductionTimeAssignment`
 - 생산 항목의 `shipmentPlanId`
 - 수량이 비어 있는 생산계획 행
+- 생산계획 항목의 `completedQuantity`
+- 생산계획 항목의 `producing` / `completed` 작업 상태
 
 대신 `ProductionDayPlan`이 날짜와 부서의 생산계획 컨테이너가 되고, 그 안의 `plans[]` 항목이 실제 생산 작업 단위가 된다. 관계형 DB에서는 이 배열을 `production_day_plan_items` 테이블로 표현한다.
 
@@ -52,7 +56,7 @@ ShipmentPlan
 - `ProductionDayPlan`은 특정 날짜와 부서의 생산 일정판이다.
 - `ProductionDayPlanItem`은 특정 주문 제품을 특정 날짜에 얼마만큼 생산할지 나타내는 생산 작업 항목이다.
 - 생산 항목은 `OrderProduct`만 참조하고 `ShipmentPlan`은 참조하지 않는다.
-- 출하 실적은 `ShipmentRecord`에 기록하고, 해당 주문 제품의 완료 생산량에서 차감된 것으로 계산한다.
+- 출하 실적은 `ShipmentRecord`에 기록하고, 해당 주문 제품의 재고 원장에서 차감된 것으로 계산한다.
 - 미계획 생산량은 저장하지 않고 계산한다.
 - 한 주문 제품은 여러 날짜에 나누어 생산할 수 있다.
 - 한 날짜 계획 안에도 같은 주문 제품이 여러 번 들어갈 수 있다.
@@ -128,16 +132,35 @@ type ProductionDayPlanItem = {
   orderProductId: string;
 
   quantity: number;
-  completedQuantity: number;
-
   estimatedDurationMinutes: number;
   durationSource: "product_default" | "manual_override";
 
-  workStatus: "planned" | "producing" | "completed" | "cancelled";
+  planningStatus: "scheduled" | "cancelled";
 
   sequence: number;
   startTime: string;
   endTime: string;
+};
+
+type ProductionReceipt = {
+  id: string;
+  orderProductId: string;
+
+  receiptDate: string;
+  quantity: number;
+  lotNo: string;
+
+  equipmentLine?: string | null;
+  storageLocation?: string | null;
+  qualityStatus: "not_recorded" | "passed" | "failed";
+  operatorName?: string | null;
+  memo?: string | null;
+
+  // 참조용 연결이다. 재고 원장의 source of truth는 orderProductId와 입고 거래다.
+  productionDayPlanItemId?: string | null;
+  transactionType: "production_receipt" | "correction";
+
+  createdAt: string;
 };
 ```
 
@@ -358,10 +381,9 @@ shipped_quantity = quantity
 | `production_day_plan_id` | `uuid` | FK to `production_day_plans.id` |
 | `order_product_id` | `uuid` | FK to `order_products.id` |
 | `quantity` | `integer` | 계획 생산 수량 |
-| `completed_quantity` | `integer` | 완료 생산 수량 |
 | `estimated_duration_minutes` | `integer` | 예상 소요 시간 |
 | `duration_source` | `production_duration_source` | 소요 시간 산정 방식 |
-| `work_status` | `production_work_status` | 생산 작업 상태 |
+| `planning_status` | `production_plan_status` | 생산계획 상태 |
 | `sequence` | `integer` | 날짜 계획 안의 순서 |
 | `start_time` | `time` | 시작 시각 |
 | `end_time` | `time` | 종료 시각 |
@@ -372,8 +394,6 @@ shipped_quantity = quantity
 주요 제약:
 
 - `quantity > 0`
-- `completed_quantity >= 0`
-- `completed_quantity <= quantity`
 - `estimated_duration_minutes > 0`
 - `sequence > 0`
 - `end_time > start_time`
@@ -388,20 +408,48 @@ estimatedDurationMinutes =
   Math.ceil((quantity / defaultUnitsPerHourSnapshot) * 60);
 ```
 
-작업 상태 규칙:
+생산계획 상태 규칙:
 
 ```text
-planned
-  아직 생산 시작 전
-
-producing
-  생산 진행 중
-
-completed
-  completed_quantity = quantity
+scheduled
+  일정판에 편성된 생산계획 항목
 
 cancelled
   계획에서 제외된 항목
+```
+
+### `production_receipts`
+
+`[생산 결과]`에서 입력하는 생산 입고 원장이다. 생산계획 항목이 아니라 `order_product_id`가 재고 기준이다.
+
+| 컬럼 | 타입 | 설명 |
+| --- | --- | --- |
+| `id` | `uuid` | PK |
+| `order_product_id` | `uuid` | FK to `order_products.id` |
+| `receipt_date` | `date` | 생산 입고일 |
+| `quantity` | `integer` | 입고 또는 정정 수량 |
+| `lot_no` | `text` | LOT/배치번호. 미입력 시 시스템 생성 |
+| `equipment_line` | `text` | 생산 설비 또는 라인 |
+| `storage_location` | `text` | 보관 위치 |
+| `quality_status` | `production_receipt_quality_status` | 품질상태 |
+| `operator_name` | `text` | 담당자 |
+| `memo` | `text` | 비고 |
+| `production_day_plan_item_id` | `uuid` | nullable FK to `production_day_plan_items.id` |
+| `transaction_type` | `production_receipt_transaction_type` | 생산입고 또는 정정거래 |
+| `created_by` | `uuid` | 입력자 |
+| `created_at` | `timestamptz` | 생성 시각 |
+
+주요 제약:
+
+- `production_receipt` 거래의 `quantity > 0`
+- 정정거래는 원본 row를 직접 수정하지 않고 새 row로 추가한다.
+- 같은 `order_product_id`의 누적 생산 입고 수량은 `order_products.quantity`를 초과할 수 없다.
+- `production_day_plan_item_id`는 선택값이다. 비어 있어도 재고 원장은 유효하다.
+
+LOT 자동 생성 기본 형식:
+
+```text
+LOT-{YYYYMMDD}-{SEQUENCE}
 ```
 
 ## Enum 후보
@@ -428,11 +476,18 @@ production_duration_source:
   product_default
   manual_override
 
-production_work_status:
-  planned
-  producing
-  completed
+production_plan_status:
+  scheduled
   cancelled
+
+production_receipt_quality_status:
+  not_recorded
+  passed
+  failed
+
+production_receipt_transaction_type:
+  production_receipt
+  correction
 ```
 
 ## 핵심 수량 계산 규칙
@@ -454,7 +509,7 @@ sum(orderProduct.shipmentPlans.map((plan) => plan.quantity))
 plannedProductionQuantity =
   sum(productionDayPlanItems
     .filter((item) => item.orderProductId === orderProduct.id)
-    .filter((item) => item.workStatus !== "cancelled")
+    .filter((item) => item.planningStatus !== "cancelled")
     .map((item) => item.quantity));
 ```
 
@@ -471,21 +526,22 @@ unplannedProductionQuantity =
   orderProduct.quantity - plannedProductionQuantity;
 ```
 
-### 생산 완료 수량
+### 생산 완료 및 재고 수량
+
+생산 완료와 재고 수량은 `ProductionDayPlanItem`에서 계산하지 않는다.
 
 ```ts
-completedProductionQuantity =
-  sum(productionDayPlanItems
-    .filter((item) => item.orderProductId === orderProduct.id)
-    .filter((item) => item.workStatus !== "cancelled")
-    .map((item) => item.completedQuantity));
+completedProductionQuantity // 생산 입고 원장 기준
+availableToShipQuantity     // 재고 원장 기준
 ```
 
-주문 제품 기준 생산 완료까지 남은 수량:
+`[생산 결과]`에서 생산 입고를 입력하고 `[재고 관리]`에서 재고 원장 기준 현재 재고를 조회한다. 계획 화면은 주문제품 기준 현재 재고를 참고 정보로 보여줄 수는 있지만, 특정 계획 행의 완료율을 판단하지 않는다.
 
 ```ts
-remainingToCompleteProductionQuantity =
-  orderProduct.quantity - completedProductionQuantity;
+receivedProductionQuantity =
+  sum(productionReceipts
+    .filter((receipt) => receipt.orderProductId === orderProduct.id)
+    .map((receipt) => receipt.quantity));
 ```
 
 ### 출하 수량
@@ -501,7 +557,7 @@ shippedQuantity =
 
 ```ts
 availableToShipQuantity =
-  completedProductionQuantity - shippedQuantity;
+  inventoryQuantityFor(orderProduct.id) - shippedQuantity;
 ```
 
 출하 입력은 항상 다음 조건을 만족해야 한다.
@@ -510,7 +566,7 @@ availableToShipQuantity =
 shipmentRecord.quantity <= availableToShipQuantity
 ```
 
-즉, 생산 완료되지 않은 수량은 출하할 수 없다.
+즉, 재고 원장 기준 출하 가능 수량을 초과해서 출하할 수 없다.
 
 ## 주요 라이프사이클
 
@@ -542,22 +598,26 @@ shipmentRecord.quantity <= availableToShipQuantity
 6. 같은 주문 제품의 계획 수량 합계가 주문 제품 수량을 넘지 않는지 검증한다.
 7. 순서 변경 시 `sequence`, `start_time`, `end_time`을 갱신한다.
 
-### 생산 진행 및 완료
+### 생산 입고 및 재고
 
-1. 생산 시작 시 `work_status = producing`으로 변경한다.
-2. 생산 실적 입력 시 `completed_quantity`를 갱신한다.
-3. `completed_quantity = quantity`가 되면 `work_status = completed`로 변경할 수 있다.
-4. 완료 생산량은 주문 제품 단위의 출하 가능 수량으로 누적된다.
+1. `[생산 결과]`에서 주문제품을 선택한다.
+2. 생산 입고 수량을 입력한다.
+3. LOT를 비우면 시스템이 자동 생성한다.
+4. 생산 입고는 주문제품 수량을 초과할 수 없다.
+5. 저장된 생산 입고는 재고 원장에 `+` 거래로 반영된다.
+6. 입고 수정은 원본 row를 직접 바꾸지 않고 정정 거래로 처리한다.
+7. 관련 생산계획은 선택값이며, 비워도 특정 계획 행의 완료율을 계산하지 않는다.
 
 ### 출하
 
 1. 사용자가 출하계획을 선택한다.
-2. 시스템은 해당 출하계획의 `order_product_id`를 기준으로 `availableToShipQuantity`를 계산한다.
+2. 시스템은 해당 출하계획의 `order_product_id`를 기준으로 재고 원장의 출하 가능 수량을 계산한다.
 3. 입력한 출하 수량이 출하 가능 수량 이하인지 확인한다.
-4. `shipment_records`를 생성한다.
-5. `shipment_plans.shipped_quantity`, `status`, `last_shipped_date`를 갱신한다.
+4. FIFO 기준으로 재고를 차감한다.
+5. `shipment_records`를 생성한다.
+6. `shipment_plans.shipped_quantity`, `status`, `last_shipped_date`를 갱신한다.
 
-출하는 생산 항목을 직접 선택하지 않는다. 같은 주문 제품에서 완료된 생산량이 있으면 어느 생산일에 만들어진 물량인지는 따지지 않고 출하 가능 수량으로 본다.
+출하는 생산계획 항목을 직접 선택하지 않는다. 같은 주문제품의 재고 원장에 출하 가능한 물량이 있으면 FIFO 기준으로 차감한다.
 
 ## 생산 화면을 위한 조회 모델
 
@@ -609,9 +669,10 @@ orderProduct.order.status === "released"
 
 - 출하 예정 수량
 - 해당 출하계획의 출하 완료 수량
-- 주문 제품 전체 생산 완료 수량
+- 주문 제품 전체 계획 수량
+- 주문 제품 전체 미계획 수량
+- 주문 제품 전체 현재 재고 수량
 - 주문 제품 전체 출하 가능 수량
-- 주문 제품 전체 미완료 생산 수량
 
 ## 예시
 
@@ -640,29 +701,14 @@ ProductionDayPlan: 2026-06-14 / R
   item 1: OrderProduct A / 150개 / 75분
 ```
 
-첫 번째 생산 항목이 완료되면:
+생산계획 화면은 아래처럼 계획만 표시한다.
 
 ```text
-completedProductionQuantity = 150
-shippedQuantity = 0
-availableToShipQuantity = 150
+plannedProductionQuantity = 300
+unplannedProductionQuantity = 0
 ```
 
-6월 18일에 100개 출하하면:
-
-```text
-completedProductionQuantity = 150
-shippedQuantity = 100
-availableToShipQuantity = 50
-```
-
-두 번째 생산 항목이 완료되면:
-
-```text
-completedProductionQuantity = 300
-shippedQuantity = 100
-availableToShipQuantity = 200
-```
+생산 완료 여부와 출하 가능 수량은 `[생산 결과]`의 생산 입고와 `[재고 관리]`의 재고 원장에서 별도로 계산한다.
 
 ## 관계 다이어그램
 
@@ -677,6 +723,8 @@ erDiagram
   shipment_plans ||--o{ shipment_records : records
   production_day_plans ||--o{ production_day_plan_items : contains
   order_products ||--o{ production_day_plan_items : produced_as
+  order_products ||--o{ production_receipts : received_as
+  production_day_plan_items ||--o{ production_receipts : optionally_referenced_by
 ```
 
 ## AI Agent 구현 지침
@@ -684,9 +732,13 @@ erDiagram
 - 새 DB를 설계할 때 `ProductionPlan`을 되살리지 않는다.
 - 생산 항목은 `production_day_plan_items`로 만든다.
 - `production_day_plan_items`에는 `shipment_plan_id`를 넣지 않는다.
+- `production_day_plan_items`에는 `completed_quantity`를 넣지 않는다.
+- `production_day_plan_items`에는 `producing` / `completed` 상태를 넣지 않는다.
 - 생산계획 draft row를 만들지 않는다.
 - 미계획 수량은 항상 계산한다.
-- 출하 가능 수량은 주문 제품 단위의 완료 생산량에서 이미 출하된 수량을 뺀 값이다.
+- 출하 가능 수량은 주문제품 단위 재고 원장에서 계산한다.
+- 생산 입고는 `production_receipts.order_product_id` 기준으로 누적한다.
+- `production_receipts.production_day_plan_item_id`는 선택 참조일 뿐 완료 판단 기준이 아니다.
 - 출하계획은 고객 약속 관리용이고, 생산계획의 부모가 아니다.
 - 주문 제품의 제품명, 규격, 부서, 생산속도는 snapshot 컬럼을 기준으로 한다.
 - 여러 row 합계가 필요한 제약은 단순 check constraint만으로 처리하지 말고 트랜잭션, 트리거, 서버 로직 중 하나로 강제한다.
@@ -696,9 +748,7 @@ erDiagram
 아래 항목은 초기 모델에는 넣지 않는다. 실제 필요가 생기면 별도 설계한다.
 
 - 불량, 폐기, 재작업 수량
-- 생산 실적 로그 테이블
-- 생산 완료 재고의 lot 추적
-- 특정 출하가 특정 생산 lot을 소비했다는 allocation 테이블
+- 특정 출하가 특정 LOT을 소비했다는 allocation 테이블
 - 휴게시간, 점심시간, 교대조 규칙
-- 설비 또는 작업자 배정
+- 생산계획 단계의 설비 또는 작업자 배정
 - 주문 제품 수량을 초과하는 예비 생산

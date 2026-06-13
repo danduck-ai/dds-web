@@ -11,10 +11,9 @@ function seedItem(patch: Partial<DailyProductionSeedItem> = {}): DailyProduction
     workStartTime: patch.workStartTime ?? "09:00",
     orderProductId: patch.orderProductId ?? "product-s",
     quantity: patch.quantity ?? 80,
-    completedQuantity: patch.completedQuantity ?? 80,
     estimatedDurationMinutes: patch.estimatedDurationMinutes ?? 40,
     durationSource: patch.durationSource ?? "product_default",
-    workStatus: patch.workStatus ?? "completed",
+    planningStatus: patch.planningStatus ?? "scheduled",
     sequence: patch.sequence ?? 1,
   };
 }
@@ -59,31 +58,25 @@ const seed: DailyProductionSeed = {
     },
   ],
   dayPlanItems: [
-    seedItem({ id: "done-yesterday", productionDate: "2026-06-12", quantity: 80, completedQuantity: 80 }),
+    seedItem({ id: "planned-yesterday", productionDate: "2026-06-12", quantity: 80 }),
     seedItem({
-      id: "today-producing",
+      id: "planned-today",
       productionDate: "2026-06-13",
       quantity: 40,
-      completedQuantity: 10,
-      workStatus: "producing",
       sequence: 2,
     }),
     seedItem({
       id: "future-plan",
       productionDate: "2026-06-15",
       quantity: 100,
-      completedQuantity: 0,
-      workStatus: "planned",
       sequence: 1,
     }),
     seedItem({
-      id: "r-today-producing",
+      id: "r-today-plan",
       orderProductId: "product-r",
       productionDate: "2026-06-13",
       departmentCode: "R",
       quantity: 50,
-      completedQuantity: 0,
-      workStatus: "producing",
       sequence: 1,
     }),
   ],
@@ -101,15 +94,13 @@ describe("product production status helpers", () => {
           productionDate: "2026-06-13",
           departmentCode: "R",
           quantity: 30,
-          completedQuantity: 0,
-          workStatus: "planned",
           sequence: 2,
         }),
         seedItem({
           id: "cancelled-only",
           productionDate: "2026-06-14",
           departmentCode: "P",
-          workStatus: "cancelled",
+          planningStatus: "cancelled",
         }),
       ],
     });
@@ -142,8 +133,8 @@ describe("product production status helpers", () => {
     ]);
   });
 
-  test("summarizes OrderProduct production by current date", () => {
-    const rows = createProductProductionRows(seed, { currentDate: "2026-06-13" });
+  test("summarizes OrderProduct plan quantities without completion fields", () => {
+    const rows = createProductProductionRows(seed);
     const productRow = rows.find((row) => row.id === "product-s");
 
     expect(rows).toHaveLength(2);
@@ -151,14 +142,14 @@ describe("product production status helpers", () => {
       id: "product-s",
       customerName: "동성전자",
       productName: "압출 실리콘 가스켓 S",
-      todayProducingQuantity: 40,
-      completedQuantity: 80,
       orderQuantity: 300,
-      completionRate: 26.7,
-      completionLabel: "26.7% (80/300)",
       plannedQuantity: 220,
       remainingPlanQuantity: 80,
     });
+    expect(productRow).not.toHaveProperty("todayProducingQuantity");
+    expect(productRow).not.toHaveProperty("completedQuantity");
+    expect(productRow).not.toHaveProperty("completionRate");
+    expect(productRow).not.toHaveProperty("completionLabel");
   });
 
   test("keeps only non-cancelled production plan items in date order", () => {
@@ -166,23 +157,22 @@ describe("product production status helpers", () => {
       {
         ...seed,
         dayPlanItems: [
-          seedItem({ id: "cancelled", productionDate: "2026-06-11", workStatus: "cancelled" }),
+          seedItem({ id: "cancelled", productionDate: "2026-06-11", planningStatus: "cancelled" }),
           ...seed.dayPlanItems,
         ],
       },
-      { currentDate: "2026-06-13" },
     );
     const productRow = rows.find((row) => row.id === "product-s");
 
     expect(productRow?.productionPlans.map((plan) => plan.id)).toEqual([
-      "done-yesterday",
-      "today-producing",
+      "planned-yesterday",
+      "planned-today",
       "future-plan",
     ]);
   });
 
   test("groups product production rows by order for the order view", () => {
-    const rows = createOrderProductionRows(seed, { currentDate: "2026-06-13" });
+    const rows = createOrderProductionRows(seed);
 
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
@@ -197,8 +187,9 @@ describe("product production status helpers", () => {
       "압출 실리콘 가스켓 S",
     ]);
     expect(rows[0].products[0]).toMatchObject({
-      todayProducingQuantity: 50,
-      completionLabel: "0% (0/120)",
+      plannedQuantity: 50,
+      remainingPlanQuantity: 70,
     });
+    expect(rows[0].products[0]).not.toHaveProperty("completionLabel");
   });
 });

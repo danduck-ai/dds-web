@@ -13,10 +13,9 @@ function seedItem(patch: Partial<DailyProductionSeedItem> = {}): DailyProduction
     workStartTime: patch.workStartTime ?? "09:00",
     orderProductId: patch.orderProductId ?? "product-s",
     quantity: patch.quantity ?? 80,
-    completedQuantity: patch.completedQuantity ?? 80,
     estimatedDurationMinutes: patch.estimatedDurationMinutes ?? 40,
     durationSource: patch.durationSource ?? "product_default",
-    workStatus: patch.workStatus ?? "completed",
+    planningStatus: patch.planningStatus ?? "scheduled",
     sequence: patch.sequence ?? 1,
   };
 }
@@ -61,31 +60,25 @@ const seed: DailyProductionSeed = {
     },
   ],
   dayPlanItems: [
-    seedItem({ id: "done-yesterday", productionDate: "2026-06-12", quantity: 80, completedQuantity: 80 }),
+    seedItem({ id: "planned-yesterday", productionDate: "2026-06-12", quantity: 80 }),
     seedItem({
-      id: "today-producing",
+      id: "planned-today",
       productionDate: "2026-06-13",
       quantity: 40,
-      completedQuantity: 10,
-      workStatus: "producing",
       sequence: 2,
     }),
     seedItem({
       id: "future-plan",
       productionDate: "2026-06-15",
       quantity: 100,
-      completedQuantity: 0,
-      workStatus: "planned",
       sequence: 1,
     }),
     seedItem({
-      id: "r-today-producing",
+      id: "r-today-plan",
       orderProductId: "product-r",
       productionDate: "2026-06-13",
       departmentCode: "R",
       quantity: 50,
-      completedQuantity: 0,
-      workStatus: "producing",
       sequence: 1,
     }),
   ],
@@ -110,7 +103,7 @@ describe("ProductProductionStatusWorkspace", () => {
   test("defaults to daily production rows with existing production day plans", () => {
     renderWorkspace();
 
-    expect(screen.getByRole("heading", { name: "생산 현황" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "생산 계획" })).toBeInTheDocument();
     expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual(["일자별", "제품별", "주문별"]);
     expect(screen.getByRole("tab", { name: "일자별" })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByRole("tab", { name: "제품별" })).toHaveAttribute("aria-selected", "false");
@@ -159,7 +152,7 @@ describe("ProductProductionStatusWorkspace", () => {
     expect(within(dialog).getByLabelText("부서")).toHaveValue("R");
   });
 
-  test("renders product rows with today's producing quantity and completion ratio", async () => {
+  test("renders product rows with plan quantities and no completion ratio", async () => {
     const user = userEvent.setup();
     renderWorkspace();
 
@@ -168,13 +161,16 @@ describe("ProductProductionStatusWorkspace", () => {
     expect(screen.getByRole("tab", { name: "제품별" })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByRole("columnheader", { name: "고객사" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "제품명" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "오늘 생산중" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "완료율" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "계획수량" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "미계획수량" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "생산계획" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "오늘 생산중" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "완료율" })).not.toBeInTheDocument();
     expect(screen.getAllByText("동성전자").length).toBeGreaterThan(0);
     expect(screen.getByText("압출 실리콘 가스켓 S")).toBeInTheDocument();
-    expect(screen.getByText("40개")).toBeInTheDocument();
-    expect(screen.getByText("26.7% (80/300)")).toBeInTheDocument();
+    expect(screen.getByText("220개")).toBeInTheDocument();
+    expect(screen.getByText("80개")).toBeInTheDocument();
+    expect(screen.queryByText("26.7% (80/300)")).not.toBeInTheDocument();
   });
 
   test("opens a production plan drawer and creates a new date quantity plan", async () => {
@@ -188,6 +184,7 @@ describe("ProductProductionStatusWorkspace", () => {
     expect(within(drawer).getByText("2026-06-15")).toBeInTheDocument();
     expect(within(drawer).getAllByText("100개")[0]).toBeInTheDocument();
     expect(within(drawer).getByText("계획 가능 80개")).toBeInTheDocument();
+    expect(within(drawer).queryByText("완료율")).not.toBeInTheDocument();
 
     await user.clear(within(drawer).getByLabelText("생산일"));
     await user.type(within(drawer).getByLabelText("생산일"), "2026-06-16");
@@ -216,11 +213,13 @@ describe("ProductProductionStatusWorkspace", () => {
 
     await user.click(screen.getByRole("button", { name: "O-DSE-26061300001 주문제품 펼치기" }));
 
-    const region = screen.getByRole("region", { name: "O-DSE-26061300001 주문제품 생산 현황" });
-    expect(within(region).getByRole("columnheader", { name: "오늘 생산중" })).toBeInTheDocument();
+    const region = screen.getByRole("region", { name: "O-DSE-26061300001 주문제품 생산 계획" });
+    expect(within(region).getByRole("columnheader", { name: "계획수량" })).toBeInTheDocument();
+    expect(within(region).getByRole("columnheader", { name: "미계획수량" })).toBeInTheDocument();
     expect(within(region).getByText("실리콘 패킹 R")).toBeInTheDocument();
     expect(within(region).getByText("50개")).toBeInTheDocument();
-    expect(within(region).getByText("0% (0/120)")).toBeInTheDocument();
+    expect(within(region).getByText("70개")).toBeInTheDocument();
+    expect(within(region).queryByText("0% (0/120)")).not.toBeInTheDocument();
   });
 
   test("uses stable group styling for order rows instead of Carbon zebra striping", async () => {
@@ -237,7 +236,7 @@ describe("ProductProductionStatusWorkspace", () => {
 
     await user.click(screen.getByRole("button", { name: "O-DSE-26061300001 주문제품 펼치기" }));
 
-    const expandedRegion = screen.getByRole("region", { name: "O-DSE-26061300001 주문제품 생산 현황" });
+    const expandedRegion = screen.getByRole("region", { name: "O-DSE-26061300001 주문제품 생산 계획" });
     expect(orderRow).toHaveAttribute("data-dss-expanded", "true");
     expect(expandedRegion.closest("tr")).toHaveClass("dss-product-status-order-expanded-row");
   });
@@ -249,7 +248,7 @@ describe("ProductProductionStatusWorkspace", () => {
     await user.click(screen.getByRole("tab", { name: "주문별" }));
     await user.click(screen.getByRole("button", { name: "O-DSE-26061300001 주문제품 펼치기" }));
 
-    const region = screen.getByRole("region", { name: "O-DSE-26061300001 주문제품 생산 현황" });
+    const region = screen.getByRole("region", { name: "O-DSE-26061300001 주문제품 생산 계획" });
     await user.click(within(region).getByRole("button", { name: "압출 실리콘 가스켓 S 생산계획 계획하기" }));
 
     expect(screen.getByRole("dialog", { name: "압출 실리콘 가스켓 S 생산계획 Drawer" })).toBeInTheDocument();

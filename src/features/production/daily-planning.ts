@@ -94,7 +94,7 @@ export function calculateDailyDuration(quantity: number, defaultUnitsPerHour: nu
 
 function plannedQuantityFor(seed: DailyProductionSeed, orderProductId: string, excludedItemId?: string) {
   return seed.dayPlanItems.reduce((sum, item) => {
-    if (item.orderProductId !== orderProductId || item.workStatus === "cancelled" || item.id === excludedItemId) {
+    if (item.orderProductId !== orderProductId || item.planningStatus === "cancelled" || item.id === excludedItemId) {
       return sum;
     }
 
@@ -125,10 +125,9 @@ function makeScheduledCard(
     nextShipDate: candidate.nextShipDate,
     shipmentSummary: candidate.shipmentSummary,
     quantity: item.quantity,
-    completedQuantity: item.completedQuantity,
     estimatedDurationMinutes: item.estimatedDurationMinutes,
     durationSource: item.durationSource,
-    workStatus: item.workStatus,
+    planningStatus: item.planningStatus,
     productionDate: item.productionDate,
     sequence: item.sequence,
   };
@@ -151,10 +150,9 @@ function makeAvailableCard(candidate: DailyProductionCandidate, remainingQuantit
     nextShipDate: candidate.nextShipDate,
     shipmentSummary: candidate.shipmentSummary,
     quantity: null,
-    completedQuantity: 0,
     estimatedDurationMinutes: null,
     durationSource: null,
-    workStatus: "planned",
+    planningStatus: "scheduled",
     productionDate: null,
   };
 }
@@ -420,10 +418,9 @@ export function buildDailyConfirmationPlan(
       startTime,
       endTime,
       quantity: card.quantity ?? 0,
-      completedQuantity: card.completedQuantity,
       estimatedDurationMinutes,
       durationSource: card.durationSource ?? "product_default",
-      workStatus: card.workStatus,
+      planningStatus: card.planningStatus,
     };
   });
 

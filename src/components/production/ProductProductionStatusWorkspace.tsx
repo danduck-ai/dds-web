@@ -41,7 +41,7 @@ import {
   type ProductProductionPlanRow,
   type ProductProductionStatusRow,
 } from "@/features/production/product-status";
-import type { DailyProductionSeed, DailyProductionSeedItem, DailyProductionWorkStatus } from "@/features/production/types";
+import type { DailyProductionPlanStatus, DailyProductionSeed, DailyProductionSeedItem } from "@/features/production/types";
 
 type ViewMode = "day" | "product" | "order";
 
@@ -50,17 +50,13 @@ type DailyPlanningModalState = {
   departmentCode: DepartmentCode;
 };
 
-const planStatusLabels: Record<DailyProductionWorkStatus, string> = {
-  planned: "계획",
-  producing: "생산중",
-  completed: "완료",
+const planStatusLabels: Record<DailyProductionPlanStatus, string> = {
+  scheduled: "편성됨",
   cancelled: "취소",
 };
 
-const planStatusTagTypes: Record<DailyProductionWorkStatus, "blue" | "teal" | "green" | "gray"> = {
-  planned: "blue",
-  producing: "teal",
-  completed: "green",
+const planStatusTagTypes: Record<DailyProductionPlanStatus, "blue" | "gray"> = {
+  scheduled: "blue",
   cancelled: "gray",
 };
 
@@ -94,8 +90,8 @@ function ProductStatusCells({
         <strong>{row.productName}</strong>
         <span className="dss-product-status-table__secondary">{row.specification}</span>
       </TableCell>
-      <TableCell title={`${row.todayProducingQuantity}`}>{formatNumber(row.todayProducingQuantity)}개</TableCell>
-      <TableCell title={row.completionLabel}>{row.completionLabel}</TableCell>
+      <TableCell title={`${row.plannedQuantity}`}>{formatNumber(row.plannedQuantity)}개</TableCell>
+      <TableCell title={`${row.remainingPlanQuantity}`}>{formatNumber(row.remainingPlanQuantity)}개</TableCell>
       <TableCell>
         <Button
           aria-label={`${row.productName} 생산계획 계획하기`}
@@ -132,8 +128,8 @@ function ProductStatusTable({
           <TableRow>
             <TableHeader>고객사</TableHeader>
             <TableHeader>제품명</TableHeader>
-            <TableHeader>오늘 생산중</TableHeader>
-            <TableHeader>완료율</TableHeader>
+            <TableHeader>계획수량</TableHeader>
+            <TableHeader>미계획수량</TableHeader>
             <TableHeader>생산계획</TableHeader>
           </TableRow>
         </TableHead>
@@ -205,7 +201,7 @@ function OrderProductsTable({
 }) {
   return (
     <section
-      aria-label={`${order.orderNo} 주문제품 생산 현황`}
+      aria-label={`${order.orderNo} 주문제품 생산 계획`}
       className="dss-product-status-order-products"
       role="region"
     >
@@ -214,8 +210,8 @@ function OrderProductsTable({
           <TableRow>
             <TableHeader>고객사</TableHeader>
             <TableHeader>제품명</TableHeader>
-            <TableHeader>오늘 생산중</TableHeader>
-            <TableHeader>완료율</TableHeader>
+            <TableHeader>계획수량</TableHeader>
+            <TableHeader>미계획수량</TableHeader>
             <TableHeader>생산계획</TableHeader>
           </TableRow>
         </TableHead>
@@ -316,8 +312,8 @@ function ProductPlanList({ plans }: { plans: ProductProductionPlanRow[] }) {
           <span role="cell">{plan.productionDate}</span>
           <span role="cell">{formatNumber(plan.quantity)}개</span>
           <span role="cell">
-            <Tag size="sm" type={planStatusTagTypes[plan.workStatus]}>
-              {planStatusLabels[plan.workStatus]}
+            <Tag size="sm" type={planStatusTagTypes[plan.planningStatus]}>
+              {planStatusLabels[plan.planningStatus]}
             </Tag>
           </span>
         </div>
@@ -418,8 +414,8 @@ function ProductionPlanDrawer({
                 <dd>{formatNumber(row.orderQuantity)}개</dd>
               </div>
               <div>
-                <dt>완료율</dt>
-                <dd>{row.completionLabel}</dd>
+                <dt>미계획수량</dt>
+                <dd>{formatNumber(row.remainingPlanQuantity)}개</dd>
               </div>
               <div>
                 <dt>생산계획</dt>
@@ -498,8 +494,8 @@ export function ProductProductionStatusWorkspace({
   const [expandedOrderIds, setExpandedOrderIds] = useState<Set<string>>(() => new Set());
   const seed = useMemo(() => ({ ...initialSeed, dayPlanItems }), [dayPlanItems, initialSeed]);
   const dayRows = useMemo(() => createDailyProductionRows(seed), [seed]);
-  const rows = useMemo(() => createProductProductionRows(seed, { currentDate }), [currentDate, seed]);
-  const orderRows = useMemo(() => createOrderProductionRows(seed, { currentDate }), [currentDate, seed]);
+  const rows = useMemo(() => createProductProductionRows(seed), [seed]);
+  const orderRows = useMemo(() => createOrderProductionRows(seed), [seed]);
   const selectedRow = rows.find((row) => row.id === selectedRowId) ?? null;
 
   function createPlan(row: ProductProductionStatusRow, productionDate: string, quantity: number) {
@@ -509,7 +505,7 @@ export function ProductProductionStatusWorkspace({
           item.orderProductId === row.orderProductId &&
           item.productionDate === productionDate &&
           item.departmentCode === row.departmentCode &&
-          item.workStatus !== "cancelled",
+          item.planningStatus !== "cancelled",
       );
       const nextSequence = Math.max(0, ...sameDateItems.map((item) => item.sequence)) + 1;
 
@@ -522,10 +518,9 @@ export function ProductProductionStatusWorkspace({
           workStartTime: "09:00",
           orderProductId: row.orderProductId,
           quantity,
-          completedQuantity: 0,
           estimatedDurationMinutes: calculateDurationMinutes(quantity, row.defaultUnitsPerHour),
           durationSource: "product_default",
-          workStatus: "planned",
+          planningStatus: "scheduled",
           sequence: nextSequence,
         },
       ];
@@ -582,14 +577,14 @@ export function ProductProductionStatusWorkspace({
 
       <header className="dss-page-header">
         <div>
-          <h1>생산 현황</h1>
-          <p>일자별, 제품별 또는 주문별로 생산 진행 수량과 계획 일정을 확인합니다.</p>
+          <h1>생산 계획</h1>
+          <p>일자별, 제품별 또는 주문별로 생산계획 편성 수량과 일정을 확인합니다.</p>
         </div>
       </header>
 
       <div className="dss-product-status-view-controls">
         <ContentSwitcher
-          aria-label="생산 현황 보기"
+          aria-label="생산 계획 보기"
           className="dss-product-status-switcher"
           onChange={({ index }) => setViewMode(index === 0 ? "day" : index === 1 ? "product" : "order")}
           selectedIndex={viewMode === "day" ? 0 : viewMode === "product" ? 1 : 2}

@@ -2,7 +2,7 @@ import type { DepartmentCode } from "@/features/orders/types";
 
 export type DailyProductionDurationSource = "product_default" | "manual_override";
 
-export type DailyProductionWorkStatus = "planned" | "producing" | "completed" | "cancelled";
+export type DailyProductionPlanStatus = "scheduled" | "cancelled";
 
 export type DailyProductionCandidate = {
   id: string;
@@ -30,10 +30,9 @@ export type DailyProductionSeedItem = {
   workStartTime: string;
   orderProductId: string;
   quantity: number;
-  completedQuantity: number;
   estimatedDurationMinutes: number;
   durationSource: DailyProductionDurationSource;
-  workStatus: DailyProductionWorkStatus;
+  planningStatus: DailyProductionPlanStatus;
   sequence: number;
 };
 
@@ -58,10 +57,9 @@ export type DailyProductionCard = {
   nextShipDate: string;
   shipmentSummary: string;
   quantity: number | null;
-  completedQuantity: number;
   estimatedDurationMinutes: number | null;
   durationSource: DailyProductionDurationSource | null;
-  workStatus: DailyProductionWorkStatus;
+  planningStatus: DailyProductionPlanStatus;
   productionDate?: string | null;
   sequence?: number;
   sourceOrderProductId?: string;
@@ -87,10 +85,9 @@ export type DailyProductionPlanItem = {
   startTime: string;
   endTime: string;
   quantity: number;
-  completedQuantity: number;
   estimatedDurationMinutes: number;
   durationSource: DailyProductionDurationSource;
-  workStatus: DailyProductionWorkStatus;
+  planningStatus: DailyProductionPlanStatus;
 };
 
 export type DailyProductionDayPlan = {

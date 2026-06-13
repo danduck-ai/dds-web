@@ -96,7 +96,7 @@ describe("DSS mock data", () => {
 
     expect(rCards.some((card) => card.productionDate === "2026-06-13" && card.sequence === 1)).toBe(true);
     expect(rCards.some((card) => card.quantity === null && card.remainingQuantity > 0)).toBe(true);
-    expect(pCards.some((card) => card.workStatus === "producing" && card.quantity !== null)).toBe(true);
+    expect(pCards.some((card) => card.planningStatus === "scheduled" && card.quantity !== null)).toBe(true);
     expect(rCards.every((card) => !("shipmentPlanId" in card))).toBe(true);
   });
 

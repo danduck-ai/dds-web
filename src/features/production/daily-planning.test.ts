@@ -81,10 +81,9 @@ function seedItem(patch: Partial<DailyProductionSeedItem> = {}): DailyProduction
     workStartTime: patch.workStartTime ?? "09:00",
     orderProductId: patch.orderProductId ?? "product-s",
     quantity: patch.quantity ?? 80,
-    completedQuantity: patch.completedQuantity ?? 0,
     estimatedDurationMinutes: patch.estimatedDurationMinutes ?? 40,
     durationSource: patch.durationSource ?? "product_default",
-    workStatus: patch.workStatus ?? "planned",
+    planningStatus: patch.planningStatus ?? "scheduled",
     sequence: patch.sequence ?? 1,
   };
 }
@@ -106,10 +105,9 @@ function cardFixture(patch: Partial<DailyProductionCard> = {}): DailyProductionC
     nextShipDate: patch.nextShipDate ?? "2026-06-18",
     shipmentSummary: patch.shipmentSummary ?? "06/18 100개 외 1",
     quantity: patch.quantity ?? null,
-    completedQuantity: patch.completedQuantity ?? 0,
     estimatedDurationMinutes: patch.estimatedDurationMinutes ?? null,
     durationSource: patch.durationSource ?? null,
-    workStatus: patch.workStatus ?? "planned",
+    planningStatus: patch.planningStatus ?? "scheduled",
     productionDate: patch.productionDate,
     sequence: patch.sequence,
     sourceOrderProductId: patch.sourceOrderProductId,
@@ -142,6 +140,7 @@ describe("daily production planning helpers", () => {
     });
     expect("shipmentPlanId" in cards[0]).toBe(false);
     expect("productionPlanId" in cards[0]).toBe(false);
+    expect("completedQuantity" in cards[0]).toBe(false);
   });
 
   test("partitions scheduled daily items from available OrderProduct candidates", () => {

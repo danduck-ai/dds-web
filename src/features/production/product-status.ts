@@ -1,13 +1,12 @@
 import type { DepartmentCode } from "@/features/orders/types";
-import type { DailyProductionSeed, DailyProductionSeedItem, DailyProductionWorkStatus } from "./types";
+import type { DailyProductionPlanStatus, DailyProductionSeed, DailyProductionSeedItem } from "./types";
 
 export type ProductProductionPlanRow = {
   id: string;
   productionDate: string;
   departmentCode: DepartmentCode;
   quantity: number;
-  completedQuantity: number;
-  workStatus: DailyProductionWorkStatus;
+  planningStatus: DailyProductionPlanStatus;
   sequence: number;
 };
 
@@ -25,10 +24,6 @@ export type ProductProductionStatusRow = {
   departmentCode: DepartmentCode;
   orderQuantity: number;
   defaultUnitsPerHour: number;
-  todayProducingQuantity: number;
-  completedQuantity: number;
-  completionRate: number;
-  completionLabel: string;
   plannedQuantity: number;
   remainingPlanQuantity: number;
   productionPlans: ProductProductionPlanRow[];
@@ -61,30 +56,13 @@ function sumQuantity(items: DailyProductionSeedItem[], getValue: (item: DailyPro
   return items.reduce((sum, item) => sum + getValue(item), 0);
 }
 
-function roundPercent(value: number) {
-  return Math.round(value * 10) / 10;
-}
-
-function formatNumber(value: number) {
-  return value.toLocaleString("ko-KR");
-}
-
-function formatPercent(value: number) {
-  return Number.isInteger(value) ? `${value}` : value.toFixed(1);
-}
-
-function makeCompletionLabel(completedQuantity: number, orderQuantity: number, completionRate: number) {
-  return `${formatPercent(completionRate)}% (${formatNumber(completedQuantity)}/${formatNumber(orderQuantity)})`;
-}
-
 function toPlanRow(item: DailyProductionSeedItem): ProductProductionPlanRow {
   return {
     id: item.id,
     productionDate: item.productionDate,
     departmentCode: item.departmentCode,
     quantity: item.quantity,
-    completedQuantity: item.completedQuantity,
-    workStatus: item.workStatus,
+    planningStatus: item.planningStatus,
     sequence: item.sequence,
   };
 }
@@ -93,7 +71,7 @@ export function createDailyProductionRows(seed: DailyProductionSeed): DailyProdu
   const rowsByPlan = new Map<string, DailyProductionStatusRow>();
 
   for (const item of seed.dayPlanItems) {
-    if (item.workStatus === "cancelled") {
+    if (item.planningStatus === "cancelled") {
       continue;
     }
 
@@ -120,27 +98,11 @@ export function createDailyProductionRows(seed: DailyProductionSeed): DailyProdu
   );
 }
 
-export function createProductProductionRows(
-  seed: DailyProductionSeed,
-  options: { currentDate: string },
-): ProductProductionStatusRow[] {
+export function createProductProductionRows(seed: DailyProductionSeed): ProductProductionStatusRow[] {
   return seed.candidates
     .map((candidate) => {
       const productItems = seed.dayPlanItems.filter((item) => item.orderProductId === candidate.orderProductId);
-      const activeItems = productItems.filter((item) => item.workStatus !== "cancelled");
-      const todayProducingQuantity = sumQuantity(
-        activeItems.filter((item) => item.productionDate === options.currentDate && item.workStatus === "producing"),
-        (item) => item.quantity,
-      );
-      const completedQuantity = Math.min(
-        candidate.orderQuantity,
-        sumQuantity(
-          activeItems.filter((item) => item.productionDate < options.currentDate),
-          (item) => item.completedQuantity,
-        ),
-      );
-      const completionRate =
-        candidate.orderQuantity > 0 ? roundPercent((completedQuantity / candidate.orderQuantity) * 100) : 0;
+      const activeItems = productItems.filter((item) => item.planningStatus !== "cancelled");
       const plannedQuantity = sumQuantity(activeItems, (item) => item.quantity);
 
       return {
@@ -157,10 +119,6 @@ export function createProductProductionRows(
         departmentCode: candidate.departmentCode,
         orderQuantity: candidate.orderQuantity,
         defaultUnitsPerHour: candidate.defaultUnitsPerHour,
-        todayProducingQuantity,
-        completedQuantity,
-        completionRate,
-        completionLabel: makeCompletionLabel(completedQuantity, candidate.orderQuantity, completionRate),
         plannedQuantity,
         remainingPlanQuantity: Math.max(0, candidate.orderQuantity - plannedQuantity),
         productionPlans: activeItems
@@ -181,11 +139,8 @@ export function createProductProductionRows(
     );
 }
 
-export function createOrderProductionRows(
-  seed: DailyProductionSeed,
-  options: { currentDate: string },
-): OrderProductionStatusRow[] {
-  const productRows = createProductProductionRows(seed, options);
+export function createOrderProductionRows(seed: DailyProductionSeed): OrderProductionStatusRow[] {
+  const productRows = createProductProductionRows(seed);
   const rowsByOrderId = new Map<string, OrderProductionStatusRow>();
 
   for (const productRow of productRows) {
