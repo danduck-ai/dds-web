@@ -1,192 +1,70 @@
 import { listOrderStatusRows } from "@/features/orders/data";
 import type { DailyProductionSeedItem } from "./types";
 import { buildDailyProductionSeed } from "./daily-planning";
+import mockData from "@/features/mock-data/dss.json";
 
-const dailyProductionPlanSeedItems: DailyProductionSeedItem[] = [
-  {
-    id: "daily-item-r-20260610-1",
-    productionDate: "2026-06-10",
-    departmentCode: "R",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000001",
-    quantity: 180,
-    estimatedDurationMinutes: 90,
-    durationSource: "product_default",
-    planningStatus: "scheduled",
-    sequence: 1,
-  },
-  {
-    id: "daily-item-s-20260610-1",
-    productionDate: "2026-06-10",
-    departmentCode: "S",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000002",
-    quantity: 90,
-    estimatedDurationMinutes: 45,
-    durationSource: "product_default",
-    planningStatus: "scheduled",
-    sequence: 1,
-  },
-  {
-    id: "daily-item-p-20260611-1",
-    productionDate: "2026-06-11",
-    departmentCode: "P",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000003",
-    quantity: 40,
-    estimatedDurationMinutes: 35,
-    durationSource: "product_default",
-    planningStatus: "scheduled",
-    sequence: 1,
-  },
-  {
-    id: "daily-item-r-20260612-1",
-    productionDate: "2026-06-12",
-    departmentCode: "R",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000004",
-    quantity: 120,
-    estimatedDurationMinutes: 60,
-    durationSource: "product_default",
-    planningStatus: "scheduled",
-    sequence: 1,
-  },
-  {
-    id: "daily-item-s-20260612-1",
-    productionDate: "2026-06-12",
-    departmentCode: "S",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000006",
-    quantity: 150,
-    estimatedDurationMinutes: 140,
-    durationSource: "manual_override",
-    planningStatus: "scheduled",
-    sequence: 1,
-  },
-  {
-    id: "daily-item-r-20260613-1",
-    productionDate: "2026-06-13",
-    departmentCode: "R",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000004",
-    quantity: 160,
-    estimatedDurationMinutes: 80,
-    durationSource: "product_default",
-    planningStatus: "scheduled",
-    sequence: 1,
-  },
-  {
-    id: "daily-item-r-20260613-2",
-    productionDate: "2026-06-13",
-    departmentCode: "R",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000007",
-    quantity: 110,
-    estimatedDurationMinutes: 60,
-    durationSource: "manual_override",
-    planningStatus: "scheduled",
-    sequence: 2,
-  },
-  {
-    id: "daily-item-p-20260613-1",
-    productionDate: "2026-06-13",
-    departmentCode: "P",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000005",
-    quantity: 240,
-    estimatedDurationMinutes: 206,
-    durationSource: "product_default",
-    planningStatus: "scheduled",
-    sequence: 1,
-  },
-  {
-    id: "daily-item-s-20260613-1",
-    productionDate: "2026-06-13",
-    departmentCode: "S",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000006",
-    quantity: 130,
-    estimatedDurationMinutes: 120,
-    durationSource: "product_default",
-    planningStatus: "scheduled",
-    sequence: 1,
-  },
-  {
-    id: "daily-item-r-20260614-1",
-    productionDate: "2026-06-14",
-    departmentCode: "R",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000007",
-    quantity: 90,
-    estimatedDurationMinutes: 50,
-    durationSource: "manual_override",
-    planningStatus: "scheduled",
-    sequence: 1,
-  },
-  {
-    id: "daily-item-p-20260614-1",
-    productionDate: "2026-06-14",
-    departmentCode: "P",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000005",
-    quantity: 220,
-    estimatedDurationMinutes: 188,
-    durationSource: "product_default",
-    planningStatus: "scheduled",
-    sequence: 1,
-  },
-  {
-    id: "daily-item-s-20260615-1",
-    productionDate: "2026-06-15",
-    departmentCode: "S",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000002",
-    quantity: 110,
-    estimatedDurationMinutes: 55,
-    durationSource: "product_default",
-    planningStatus: "scheduled",
-    sequence: 1,
-  },
-  {
-    id: "daily-item-p-20260615-1",
-    productionDate: "2026-06-15",
-    departmentCode: "P",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000003",
-    quantity: 60,
-    estimatedDurationMinutes: 52,
-    durationSource: "product_default",
-    planningStatus: "scheduled",
-    sequence: 1,
-  },
-  {
-    id: "daily-item-r-20260616-1",
-    productionDate: "2026-06-16",
-    departmentCode: "R",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000001",
-    quantity: 160,
-    estimatedDurationMinutes: 80,
-    durationSource: "product_default",
-    planningStatus: "scheduled",
-    sequence: 1,
-  },
-  {
-    id: "daily-item-s-20260616-cancelled",
-    productionDate: "2026-06-16",
-    departmentCode: "S",
-    workStartTime: "09:00",
-    orderProductId: "41000000-0000-4000-8000-000000000006",
-    quantity: 70,
-    estimatedDurationMinutes: 65,
-    durationSource: "manual_override",
-    planningStatus: "cancelled",
-    sequence: 1,
-  },
-];
+type ProductionDayPlanSeedRow = {
+  id: string;
+  production_date: string;
+  department_code: "R" | "S" | "P";
+  work_start_time: string;
+};
+
+type ProductionDayPlanItemSeedRow = {
+  id: string;
+  production_day_plan_id: string;
+  order_product_id: string;
+  quantity: number;
+  estimated_duration_minutes: number;
+  duration_source: DailyProductionSeedItem["durationSource"];
+  planning_status: DailyProductionSeedItem["planningStatus"];
+  sequence: number;
+};
+
+type DailyMockData = {
+  production_day_plans: ProductionDayPlanSeedRow[];
+  production_day_plan_items: ProductionDayPlanItemSeedRow[];
+};
+
+const dailyMockData = mockData as DailyMockData;
+
+function listDailyProductionPlanItems(): DailyProductionSeedItem[] {
+  const dayPlanById = new Map(dailyMockData.production_day_plans.map((plan) => [plan.id, plan]));
+
+  return dailyMockData.production_day_plan_items
+    .flatMap((item) => {
+      const dayPlan = dayPlanById.get(item.production_day_plan_id);
+
+      if (!dayPlan) {
+        return [];
+      }
+
+      return [
+        {
+          id: item.id,
+          productionDate: dayPlan.production_date,
+          departmentCode: dayPlan.department_code,
+          workStartTime: dayPlan.work_start_time,
+          orderProductId: item.order_product_id,
+          quantity: item.quantity,
+          estimatedDurationMinutes: item.estimated_duration_minutes,
+          durationSource: item.duration_source,
+          planningStatus: item.planning_status,
+          sequence: item.sequence,
+        },
+      ];
+    })
+    .sort(
+      (left, right) =>
+        left.productionDate.localeCompare(right.productionDate) ||
+        left.departmentCode.localeCompare(right.departmentCode) ||
+        left.sequence - right.sequence ||
+        left.id.localeCompare(right.id),
+    );
+}
 
 export async function listDailyProductionSeed() {
   const orders = await listOrderStatusRows();
 
-  return buildDailyProductionSeed(orders, dailyProductionPlanSeedItems);
+  return buildDailyProductionSeed(orders, listDailyProductionPlanItems());
 }

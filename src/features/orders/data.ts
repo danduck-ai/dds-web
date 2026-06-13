@@ -38,18 +38,9 @@ type MockOrderRow = {
   channel: string;
   customer_id: string;
   contact_id: string;
-  design_id: string;
-  quantity: number;
   received_by: string;
   created_at: string;
   completed_at: string | null;
-};
-
-type MockDeliveryScheduleRow = {
-  id: string;
-  order_id: string;
-  scheduled_date: string;
-  quantity: number;
 };
 
 type MockOrderProductRow = {
@@ -78,9 +69,8 @@ type MockData = {
   contacts: MockContactRow[];
   designs: MockDesignRow[];
   orders: MockOrderRow[];
-  delivery_schedules: MockDeliveryScheduleRow[];
-  order_products?: MockOrderProductRow[];
-  shipment_plans?: MockShipmentPlanRow[];
+  order_products: MockOrderProductRow[];
+  shipment_plans: MockShipmentPlanRow[];
 };
 
 const dssData = mockData as unknown as MockData;
@@ -125,17 +115,6 @@ function mapShipmentPlanRow(row: MockShipmentPlanRow): ShipmentPlanRecord {
   };
 }
 
-function createFallbackShipmentPlan(schedule: MockDeliveryScheduleRow): ShipmentPlanRecord {
-  const id = `shipment-${schedule.id}`;
-
-  return {
-    id,
-    plannedShipDate: schedule.scheduled_date,
-    quantity: schedule.quantity,
-    status: "ready",
-  };
-}
-
 function mapOrderProductRow(
   row: MockOrderProductRow,
   design: MockDesignRow | undefined,
@@ -150,24 +129,6 @@ function mapOrderProductRow(
     departmentCode: asDepartmentCode(row.department_code_snapshot ?? design?.department_code),
     defaultUnitsPerHour: row.default_units_per_hour_snapshot ?? design?.default_units_per_hour ?? 60,
     quantity: row.quantity,
-    shipmentPlans,
-  };
-}
-
-function createFallbackOrderProduct(
-  order: MockOrderRow,
-  design: MockDesignRow | undefined,
-  shipmentPlans: ShipmentPlanRecord[],
-): OrderProductRecord {
-  return {
-    id: `product-${order.id}`,
-    designId: order.design_id,
-    designNo: design?.design_no ?? "-",
-    productName: design?.product_name ?? "-",
-    specification: design?.specification ?? "-",
-    departmentCode: asDepartmentCode(design?.department_code),
-    defaultUnitsPerHour: design?.default_units_per_hour ?? 60,
-    quantity: order.quantity,
     shipmentPlans,
   };
 }
@@ -199,19 +160,11 @@ function buildOrderProducts(
   designById: Map<string, MockDesignRow>,
   shipmentPlansByProductId: Map<string, ShipmentPlanRecord[]>,
 ) {
-  const targetProducts = (dssData.order_products ?? []).filter((product) => product.order_id === order.id);
-
-  if (targetProducts.length > 0) {
-    return targetProducts.map((product) =>
+  return dssData.order_products
+    .filter((product) => product.order_id === order.id)
+    .map((product) =>
       mapOrderProductRow(product, designById.get(product.design_id), shipmentPlansByProductId.get(product.id) ?? []),
     );
-  }
-
-  const fallbackShipmentPlans = dssData.delivery_schedules
-    .filter((schedule) => schedule.order_id === order.id)
-    .map(createFallbackShipmentPlan);
-
-  return [createFallbackOrderProduct(order, designById.get(order.design_id), fallbackShipmentPlans)];
 }
 
 function listMockOrders(filterOrder: (order: MockOrderRow) => boolean) {
@@ -220,7 +173,7 @@ function listMockOrders(filterOrder: (order: MockOrderRow) => boolean) {
   const designById = new Map(dssData.designs.map((design) => [design.id, design]));
   const shipmentPlansByProductId = new Map<string, ShipmentPlanRecord[]>();
 
-  for (const plan of dssData.shipment_plans ?? []) {
+  for (const plan of dssData.shipment_plans) {
     const current = shipmentPlansByProductId.get(plan.order_product_id) ?? [];
     current.push(mapShipmentPlanRow(plan));
     shipmentPlansByProductId.set(plan.order_product_id, current);

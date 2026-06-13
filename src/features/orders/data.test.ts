@@ -20,7 +20,7 @@ describe("order data loaders", () => {
   });
 
   test("maps order codes, multiple products, and shipment plans without production drafts", async () => {
-    const rows = await listOrders("active");
+    const rows = await listOrders("released");
     const multiProductOrder = rows.find((row) => row.products.length > 1);
 
     expect(multiProductOrder?.orderNo).toMatch(/^O-[A-Z0-9]+-\d{11}$/);

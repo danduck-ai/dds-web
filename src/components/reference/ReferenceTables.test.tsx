@@ -20,6 +20,7 @@ describe("ReferenceTables", () => {
             productName: "실리콘 패킹 R",
             specification: "R-100 / 5T",
             departmentCode: "R",
+            defaultUnitsPerHour: 120,
           },
         ]}
       />,
@@ -41,6 +42,7 @@ describe("ReferenceTables", () => {
             productName: "실리콘 패킹 R",
             specification: "R-100 / 5T",
             departmentCode: "R",
+            defaultUnitsPerHour: 120,
           },
           {
             id: "design-2",
@@ -48,6 +50,7 @@ describe("ReferenceTables", () => {
             productName: "실리콘 몰드 P",
             specification: "P-300",
             departmentCode: "P",
+            defaultUnitsPerHour: 45,
           },
         ]}
       />,

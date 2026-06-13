@@ -2,6 +2,7 @@ import type { DepartmentCode, OrderListRow, ShipmentPlanRecord } from "@/feature
 import { listOrderStatusRows } from "@/features/orders/data";
 import { listDailyProductionSeed } from "./daily-seed";
 import type { DailyProductionSeedItem } from "./types";
+import mockData from "@/features/mock-data/dss.json";
 
 export type ProductionReceiptQualityStatus = "not_recorded" | "passed" | "failed";
 
@@ -112,276 +113,67 @@ export type ProductionReceiptValidationResult =
       fieldErrors: Partial<Record<"orderProductId" | "quantity", string>>;
     };
 
-const productionReceiptSeedItems: ProductionReceiptRecord[] = [
-  {
-    id: "receipt-410000000001-20260611-001",
-    orderProductId: "41000000-0000-4000-8000-000000000001",
-    receiptDate: "2026-06-11",
-    quantity: 260,
-    lotNo: "LOT-20260611-001",
-    equipmentLine: "R-2라인",
-    storageLocation: "R-A02",
-    qualityStatus: "passed",
-    operatorName: "최지훈",
-    memo: "긴급 출하 대비 선입고",
-    productionPlanItemId: "daily-item-r-20260610-1",
-    transactionType: "production_receipt",
-    createdAt: "2026-06-11T08:45:00.000Z",
-  },
-  {
-    id: "receipt-410000000001-20260611-002",
-    orderProductId: "41000000-0000-4000-8000-000000000001",
-    receiptDate: "2026-06-11",
-    quantity: 140,
-    lotNo: "LOT-20260611-002",
-    equipmentLine: "R-2라인",
-    storageLocation: "R-B01",
-    qualityStatus: "not_recorded",
-    operatorName: "최지훈",
-    memo: null,
-    productionPlanItemId: "daily-item-r-20260610-1",
-    transactionType: "production_receipt",
-    createdAt: "2026-06-11T14:20:00.000Z",
-  },
-  {
-    id: "receipt-410000000002-20260611-003",
-    orderProductId: "41000000-0000-4000-8000-000000000002",
-    receiptDate: "2026-06-11",
-    quantity: 90,
-    lotNo: "LOT-20260611-003",
-    equipmentLine: "S-1라인",
-    storageLocation: "S-A01",
-    qualityStatus: "passed",
-    operatorName: "박현우",
-    memo: "분할 입고 1차",
-    productionPlanItemId: "daily-item-s-20260610-1",
-    transactionType: "production_receipt",
-    createdAt: "2026-06-11T15:05:00.000Z",
-  },
-  {
-    id: "receipt-410000000004-20260612-001",
-    orderProductId: "41000000-0000-4000-8000-000000000004",
-    receiptDate: "2026-06-12",
-    quantity: 160,
-    lotNo: "LOT-20260612-001",
-    equipmentLine: "R-1라인",
-    storageLocation: "R-A01",
-    qualityStatus: "not_recorded",
-    operatorName: "박현우",
-    memo: "초도 생산분",
-    productionPlanItemId: "daily-item-r-20260612-1",
-    transactionType: "production_receipt",
-    createdAt: "2026-06-12T09:30:00.000Z",
-  },
-  {
-    id: "receipt-410000000004-20260612-004",
-    orderProductId: "41000000-0000-4000-8000-000000000004",
-    receiptDate: "2026-06-12",
-    quantity: 140,
-    lotNo: "LOT-20260612-004",
-    equipmentLine: "R-1라인",
-    storageLocation: "R-A02",
-    qualityStatus: "passed",
-    operatorName: "박현우",
-    memo: "동일 주문제품 보관장소 분산",
-    productionPlanItemId: "daily-item-r-20260613-1",
-    transactionType: "production_receipt",
-    createdAt: "2026-06-12T13:40:00.000Z",
-  },
-  {
-    id: "receipt-410000000006-20260612-002",
-    orderProductId: "41000000-0000-4000-8000-000000000006",
-    receiptDate: "2026-06-12",
-    quantity: 120,
-    lotNo: "LOT-20260612-002",
-    equipmentLine: "S-2라인",
-    storageLocation: "S-B01",
-    qualityStatus: "not_recorded",
-    operatorName: "박현우",
-    memo: null,
-    productionPlanItemId: "daily-item-s-20260612-1",
-    transactionType: "production_receipt",
-    createdAt: "2026-06-12T11:10:00.000Z",
-  },
-  {
-    id: "receipt-410000000006-20260613-003",
-    orderProductId: "41000000-0000-4000-8000-000000000006",
-    receiptDate: "2026-06-13",
-    quantity: 210,
-    lotNo: "LOT-20260613-003",
-    equipmentLine: "S-2라인",
-    storageLocation: "S-B02",
-    qualityStatus: "not_recorded",
-    operatorName: "박현우",
-    memo: "2차 생산분",
-    productionPlanItemId: "daily-item-s-20260613-1",
-    transactionType: "production_receipt",
-    createdAt: "2026-06-13T12:05:00.000Z",
-  },
-  {
-    id: "receipt-410000000005-20260613-001",
-    orderProductId: "41000000-0000-4000-8000-000000000005",
-    receiptDate: "2026-06-13",
-    quantity: 180,
-    lotNo: "LOT-20260613-001",
-    equipmentLine: "P-1라인",
-    storageLocation: "P-C01",
-    qualityStatus: "passed",
-    operatorName: "최지훈",
-    memo: "외관 확인 완료",
-    productionPlanItemId: "daily-item-p-20260613-1",
-    transactionType: "production_receipt",
-    createdAt: "2026-06-13T10:20:00.000Z",
-  },
-  {
-    id: "receipt-410000000005-20260613-004",
-    orderProductId: "41000000-0000-4000-8000-000000000005",
-    receiptDate: "2026-06-13",
-    quantity: 120,
-    lotNo: "LOT-20260613-004",
-    equipmentLine: "P-1라인",
-    storageLocation: null,
-    qualityStatus: "not_recorded",
-    operatorName: "최지훈",
-    memo: "보관위치 미입력 케이스",
-    productionPlanItemId: "daily-item-p-20260613-1",
-    transactionType: "production_receipt",
-    createdAt: "2026-06-13T14:30:00.000Z",
-  },
-  {
-    id: "receipt-410000000007-20260613-005",
-    orderProductId: "41000000-0000-4000-8000-000000000007",
-    receiptDate: "2026-06-13",
-    quantity: 110,
-    lotNo: "LOT-20260613-005",
-    equipmentLine: "R-3라인",
-    storageLocation: "R-C01",
-    qualityStatus: "failed",
-    operatorName: "최지훈",
-    memo: "품질 확인 필요",
-    productionPlanItemId: "daily-item-r-20260613-2",
-    transactionType: "production_receipt",
-    createdAt: "2026-06-13T15:10:00.000Z",
-  },
-  {
-    id: "receipt-400000000001-20260616-001",
-    orderProductId: "product-40000000-0000-4000-8000-000000000001",
-    receiptDate: "2026-06-16",
-    quantity: 240,
-    lotNo: "LOT-20260616-001",
-    equipmentLine: "R-1라인",
-    storageLocation: "R-D01",
-    qualityStatus: "passed",
-    operatorName: "박현우",
-    memo: "출하관리 입력 테스트용 방진 고무 패드 재고",
-    productionPlanItemId: null,
-    transactionType: "production_receipt",
-    createdAt: "2026-06-16T09:40:00.000Z",
-  },
-  {
-    id: "receipt-400000000004-20260617-001",
-    orderProductId: "product-40000000-0000-4000-8000-000000000004",
-    receiptDate: "2026-06-17",
-    quantity: 150,
-    lotNo: "LOT-20260617-001",
-    equipmentLine: "S-1라인",
-    storageLocation: "S-C01",
-    qualityStatus: "passed",
-    operatorName: "박현우",
-    memo: "출하관리 입력 테스트용 실리콘 튜브 재고",
-    productionPlanItemId: null,
-    transactionType: "production_receipt",
-    createdAt: "2026-06-17T10:15:00.000Z",
-  },
-  {
-    id: "receipt-400000000005-20260615-001",
-    orderProductId: "product-40000000-0000-4000-8000-000000000005",
-    receiptDate: "2026-06-15",
-    quantity: 60,
-    lotNo: "LOT-20260615-001",
-    equipmentLine: "P-2라인",
-    storageLocation: "P-D01",
-    qualityStatus: "passed",
-    operatorName: "최지훈",
-    memo: "출하관리 입력 테스트용 고정밀 몰딩 부품 재고",
-    productionPlanItemId: null,
-    transactionType: "production_receipt",
-    createdAt: "2026-06-15T11:25:00.000Z",
-  },
-];
+type ProductionReceiptSeedRow = {
+  id: string;
+  order_product_id: string;
+  receipt_date: string;
+  quantity: number;
+  lot_no: string;
+  equipment_line: string | null;
+  storage_location: string | null;
+  quality_status: ProductionReceiptQualityStatus;
+  operator_name: string | null;
+  memo: string | null;
+  production_day_plan_item_id: string | null;
+  transaction_type: ProductionReceiptTransactionType;
+  created_at: string;
+};
 
-const productionShipmentRecordSeedItems: ProductionShipmentRecord[] = [
-  {
-    id: "shipment-record-510000000001-20260613-001",
-    shipmentPlanId: "51000000-0000-4000-8000-000000000001",
-    shippedDate: "2026-06-13",
-    quantity: 120,
-    createdAt: "2026-06-13T16:00:00.000Z",
-  },
-  {
-    id: "shipment-record-510000000001-20260613-003",
-    shipmentPlanId: "51000000-0000-4000-8000-000000000001",
-    shippedDate: "2026-06-13",
-    quantity: 180,
-    createdAt: "2026-06-13T17:20:00.000Z",
-  },
-  {
-    id: "shipment-record-510000000003-20260612-001",
-    shipmentPlanId: "51000000-0000-4000-8000-000000000003",
-    shippedDate: "2026-06-12",
-    quantity: 70,
-    createdAt: "2026-06-12T16:20:00.000Z",
-  },
-  {
-    id: "shipment-record-510000000005-20260609-001",
-    shipmentPlanId: "51000000-0000-4000-8000-000000000005",
-    shippedDate: "2026-06-09",
-    quantity: 80,
-    createdAt: "2026-06-09T11:10:00.000Z",
-  },
-  {
-    id: "shipment-record-510000000005-20260609-002",
-    shipmentPlanId: "51000000-0000-4000-8000-000000000005",
-    shippedDate: "2026-06-09",
-    quantity: 120,
-    createdAt: "2026-06-09T15:35:00.000Z",
-  },
-  {
-    id: "shipment-record-510000000006-20260612-001",
-    shipmentPlanId: "51000000-0000-4000-8000-000000000006",
-    shippedDate: "2026-06-12",
-    quantity: 80,
-    createdAt: "2026-06-12T17:05:00.000Z",
-  },
-  {
-    id: "shipment-record-510000000007-20260613-001",
-    shipmentPlanId: "51000000-0000-4000-8000-000000000007",
-    shippedDate: "2026-06-13",
-    quantity: 180,
-    createdAt: "2026-06-13T15:40:00.000Z",
-  },
-  {
-    id: "shipment-record-510000000008-20260613-002",
-    shipmentPlanId: "51000000-0000-4000-8000-000000000008",
-    shippedDate: "2026-06-13",
-    quantity: 60,
-    createdAt: "2026-06-13T16:30:00.000Z",
-  },
-  {
-    id: "shipment-record-510000000008-20260613-004",
-    shipmentPlanId: "51000000-0000-4000-8000-000000000008",
-    shippedDate: "2026-06-13",
-    quantity: 140,
-    createdAt: "2026-06-13T18:10:00.000Z",
-  },
-  {
-    id: "shipment-record-510000000010-20260613-001",
-    shipmentPlanId: "51000000-0000-4000-8000-000000000010",
-    shippedDate: "2026-06-13",
-    quantity: 90,
-    createdAt: "2026-06-13T16:50:00.000Z",
-  },
-];
+type ProductionShipmentRecordSeedRow = {
+  id: string;
+  shipment_plan_id: string;
+  shipped_date: string;
+  quantity: number;
+  created_at: string;
+};
+
+type ProductionMockData = {
+  production_receipts: ProductionReceiptSeedRow[];
+  shipment_records: ProductionShipmentRecordSeedRow[];
+};
+
+const productionMockData = mockData as unknown as ProductionMockData;
+
+function mapProductionReceiptRow(row: ProductionReceiptSeedRow): ProductionReceiptRecord {
+  return {
+    id: row.id,
+    orderProductId: row.order_product_id,
+    receiptDate: row.receipt_date,
+    quantity: row.quantity,
+    lotNo: row.lot_no,
+    equipmentLine: row.equipment_line,
+    storageLocation: row.storage_location,
+    qualityStatus: row.quality_status,
+    operatorName: row.operator_name,
+    memo: row.memo,
+    productionPlanItemId: row.production_day_plan_item_id,
+    transactionType: row.transaction_type,
+    createdAt: row.created_at,
+  };
+}
+
+function mapProductionShipmentRecordRow(row: ProductionShipmentRecordSeedRow): ProductionShipmentRecord {
+  return {
+    id: row.id,
+    shipmentPlanId: row.shipment_plan_id,
+    shippedDate: row.shipped_date,
+    quantity: row.quantity,
+    createdAt: row.created_at,
+  };
+}
+
+const productionReceiptSeedItems = productionMockData.production_receipts.map(mapProductionReceiptRow);
+const productionShipmentRecordSeedItems = productionMockData.shipment_records.map(mapProductionShipmentRecordRow);
 
 function normalizeOptionalText(value: string | undefined) {
   const trimmed = value?.trim() ?? "";

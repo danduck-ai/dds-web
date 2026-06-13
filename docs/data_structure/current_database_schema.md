@@ -631,7 +631,7 @@ remaining_receivable_quantity = greatest(0, order_quantity - received_quantity)
 - `production_day_plan_items`의 `producing`, `completed` 작업 상태
 - 출하계획마다 자동 생성되는 생산계획 draft row
 
-현재 mock 데이터에 남아 있는 `delivery_schedules`, `orders.design_id`, `orders.quantity`, `orders.delivery_type`은 레거시 호환 및 fallback 용도로만 본다. 실제 신규 DB 설계에서는 `order_products`와 `shipment_plans`로 정규화한다.
+현재 mock 데이터도 `order_products`와 `shipment_plans` 기준으로 정규화한다. `delivery_schedules`, `orders.design_id`, `orders.quantity`, `orders.delivery_type` 같은 레거시 seed 필드는 다시 추가하지 않는다.
 
 ## ERD
 

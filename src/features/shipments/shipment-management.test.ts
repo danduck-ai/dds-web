@@ -235,7 +235,7 @@ describe("shipment management helpers", () => {
     const activeInputRows = visibleRows.filter((row) => row.shipmentStatus !== "completed" && getShipmentInputLimit(row) > 0);
 
     expect(activeInputRows.length).toBeGreaterThanOrEqual(3);
-    expect(activeInputRows.some((row) => row.shipmentPlanId === "shipment-50000000-0000-4000-8000-000000000009")).toBe(true);
-    expect(activeInputRows.some((row) => row.shipmentPlanId === "shipment-50000000-0000-4000-8000-000000000001")).toBe(true);
+    expect(activeInputRows.some((row) => row.shipmentPlanId === "51000000-0000-4000-8000-000000000002")).toBe(true);
+    expect(activeInputRows.some((row) => row.shipmentPlanId === "51000000-0000-4000-8000-000000000009")).toBe(true);
   });
 });
