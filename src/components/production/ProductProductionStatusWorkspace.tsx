@@ -528,6 +528,21 @@ export function ProductProductionStatusWorkspace({
     });
   }
 
+  function replaceDailyPlanItems(nextItems: DailyProductionSeedItem[]) {
+    if (!dailyPlanningModal) {
+      return;
+    }
+
+    setDayPlanItems((current) => [
+      ...current.filter(
+        (item) =>
+          item.productionDate !== dailyPlanningModal.productionDate ||
+          item.departmentCode !== dailyPlanningModal.departmentCode,
+      ),
+      ...nextItems,
+    ]);
+  }
+
   function toggleExpandedOrder(orderId: string) {
     setExpandedOrderIds((current) => {
       const next = new Set(current);
@@ -650,7 +665,8 @@ export function ProductProductionStatusWorkspace({
             initialProductionDate={dailyPlanningModal.productionDate}
             initialSeed={seed}
             key={`${dailyPlanningModal.productionDate}-${dailyPlanningModal.departmentCode}`}
-            onSaved={(message) => {
+            onSaved={(message, nextItems) => {
+              replaceDailyPlanItems(nextItems);
               setDailyPlanningModal(null);
               setDailyPlanningToast(message);
             }}

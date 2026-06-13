@@ -141,6 +141,29 @@ describe("ProductProductionStatusWorkspace", () => {
     expect(screen.getByText("일간 생산 계획표가 저장되었습니다.")).toBeInTheDocument();
   });
 
+  test("updates daily production rows after saving the embedded daily plan", async () => {
+    const user = userEvent.setup();
+    renderWorkspace();
+
+    expect(screen.getByRole("button", { name: "2026-06-13 S 예정된 생산건수 열기" })).toHaveTextContent("1건");
+
+    await user.click(screen.getByRole("button", { name: "일간 생산 계획 작성" }));
+    const dialog = screen.getByRole("dialog", { name: "일간 생산 계획 작성" });
+
+    await user.click(within(dialog).getByRole("checkbox", { name: "[동성전자] 압출 실리콘 가스켓 S 80개 (다음 출하 D-5)" }));
+    await user.click(within(dialog).getByRole("button", { name: "선택 제품 계획표에 추가" }));
+
+    const quantityDialog = screen.getByRole("dialog", { name: "생산수량 입력" });
+    await user.type(
+      within(quantityDialog).getByRole("spinbutton", { name: "O-DSE-26061300001 압출 실리콘 가스켓 S 생산수량" }),
+      "60",
+    );
+    await user.click(within(quantityDialog).getByRole("button", { name: "적용" }));
+    await user.click(within(dialog).getByRole("button", { name: "저장" }));
+
+    expect(screen.getByRole("button", { name: "2026-06-13 S 예정된 생산건수 열기" })).toHaveTextContent("2건");
+  });
+
   test("opens daily production planning modal from a daily production count row", async () => {
     const user = userEvent.setup();
     renderWorkspace();

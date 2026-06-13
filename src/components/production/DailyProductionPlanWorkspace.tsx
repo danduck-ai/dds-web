@@ -41,7 +41,12 @@ import {
   reorderDailyCards,
   updateDailyScheduledCardQuantity,
 } from "@/features/production/daily-planning";
-import type { DailyProductionCard, DailyProductionPlanItem, DailyProductionSeed } from "@/features/production/types";
+import type {
+  DailyProductionCard,
+  DailyProductionPlanItem,
+  DailyProductionSeed,
+  DailyProductionSeedItem,
+} from "@/features/production/types";
 
 export type DailyProductionProfile = {
   displayName: string;
@@ -237,7 +242,7 @@ export function DailyProductionPlanWorkspace({
   initialDepartmentCode?: DepartmentCode;
   initialProductionDate?: string;
   initialSeed: DailyProductionSeed;
-  onSaved?: (message: string) => void;
+  onSaved?: (message: string, dayPlanItems: DailyProductionSeedItem[]) => void;
   profile: DailyProductionProfile;
   toastDurationMs?: number;
 }) {
@@ -452,9 +457,23 @@ export function DailyProductionPlanWorkspace({
 
     setConfirmedItems(confirmationPlan.dayPlan.items);
     const message = "일간 생산 계획표가 저장되었습니다.";
+    const savedItems = confirmationPlan.dayPlan.items.map(
+      (item): DailyProductionSeedItem => ({
+        id: item.id,
+        productionDate: item.productionDate,
+        departmentCode: item.departmentCode,
+        workStartTime: confirmationPlan.dayPlan.workStartTime,
+        orderProductId: item.orderProductId,
+        quantity: item.quantity,
+        estimatedDurationMinutes: item.estimatedDurationMinutes,
+        durationSource: item.durationSource,
+        planningStatus: item.planningStatus,
+        sequence: item.sequence,
+      }),
+    );
 
     if (onSaved) {
-      onSaved(message);
+      onSaved(message, savedItems);
       return;
     }
 
