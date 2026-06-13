@@ -275,6 +275,17 @@ describe("OrderWorkspace", () => {
     expect(screen.getByRole("button", { name: "취소" })).toBeInTheDocument();
   });
 
+  test("allows executive users to manage order intake", () => {
+    renderWorkspace({ role: "E", receiverLabel: "임원 / executive@dss.local" });
+
+    expect(screen.getByRole("heading", { name: "주문 접수" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "새 주문" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "전체 선택" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "수정" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "전달" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "취소" })).toBeInTheDocument();
+  });
+
   test("keeps order products collapsed by default and expands them as sub items", async () => {
     const user = userEvent.setup();
     renderWorkspace({ initialOrders: [layeredOrder], initialStatus: "active" });

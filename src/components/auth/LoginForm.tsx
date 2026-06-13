@@ -6,7 +6,9 @@ import { signInWithDevRole, signInWithPassword } from "@/lib/auth/actions";
 
 const quickLoginButtons = [
   { role: "A", label: "사무직으로 로그인" },
-  { role: "P", label: "현장직으로 로그인" },
+  { role: "P_R", label: "R 부서 현장직으로 로그인" },
+  { role: "P_S", label: "S 부서 현장직으로 로그인" },
+  { role: "P_P", label: "P 부서 현장직으로 로그인" },
   { role: "E", label: "임원으로 로그인" },
 ];
 
@@ -16,8 +18,8 @@ export function LoginForm() {
       <Stack gap={6}>
         <header>
           <p>DSS</p>
-        <h1>동성실리콘 주문관리</h1>
-        <span>로컬 POC 환경</span>
+          <h1>동성실리콘 주문관리</h1>
+          <span>로컬 POC 환경</span>
         </header>
 
         <Form action={signInWithPassword}>

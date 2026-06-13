@@ -31,6 +31,7 @@ import {
   validateShipmentRecordDraft,
   type ShipmentManagementRow,
 } from "@/features/shipments/shipment-management";
+import { hasFullAccess } from "@/lib/auth/permissions";
 
 const shipmentStatusTagTypes: Record<ShipmentStatus, "blue" | "cyan" | "green" | "gray"> = {
   ready: "blue",
@@ -343,7 +344,7 @@ export function ShipmentManagementWorkspace({
     [currentDate, excludeOldCompleted, rows],
   );
   const selectedRow = rows.find((row) => row.shipmentPlanId === selectedShipmentPlanId) ?? null;
-  const canInput = role !== "E";
+  const canInput = role === "P" || hasFullAccess(role);
 
   useEffect(() => {
     if (!toastMessage) {

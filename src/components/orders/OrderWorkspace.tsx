@@ -12,6 +12,7 @@ import {
   releaseLocalOrders,
   updateLocalOrder,
 } from "@/features/orders/local-state";
+import { hasFullAccess } from "@/lib/auth/permissions";
 import { ConfirmActionModal } from "./ConfirmActionModal";
 import { OrderDrawer } from "./OrderDrawer";
 import { OrderTable } from "./OrderTable";
@@ -82,7 +83,7 @@ export function OrderWorkspace({
       }),
     [effectiveCurrentDate, excludeOldCompleted, initialStatus, mode, orders],
   );
-  const canManage = role === "A" && mode === "intake" && initialStatus === "active";
+  const canManage = hasFullAccess(role) && mode === "intake" && initialStatus === "active";
   const title = mode === "intake" ? "주문 접수" : "주문 현황";
   const description =
     mode === "intake"

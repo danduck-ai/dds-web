@@ -1,5 +1,8 @@
+import { cookies } from "next/headers";
+
 import type { AppRole } from "@/features/orders/types";
 import mockData from "@/features/mock-data/dss.json";
+import { DEV_PROFILE_COOKIE_NAME } from "./dev-accounts";
 
 export type CurrentProfile = {
   id: string;
@@ -15,12 +18,18 @@ type ProfileRow = {
   display_name: string;
   role: AppRole;
   department_code?: string | null;
+  is_active: boolean;
 };
 
 export async function getCurrentProfile(): Promise<CurrentProfile | null> {
-  const data = mockData.profiles.find((profile) => profile.role === "A" && profile.is_active) as
-    | ProfileRow
-    | undefined;
+  const cookieStore = await cookies();
+  const profileId = cookieStore.get(DEV_PROFILE_COOKIE_NAME)?.value;
+
+  if (!profileId) {
+    return null;
+  }
+
+  const data = mockData.profiles.find((profile) => profile.id === profileId && profile.is_active) as ProfileRow | undefined;
 
   if (!data) {
     return null;
