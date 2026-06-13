@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { listOrderStatusRows } from "@/features/orders/data";
 import { listDailyProductionSeed } from "@/features/production/daily-seed";
 import { createDailyProductionPlanningCards } from "@/features/production/daily-planning";
+import { createDailyProductionRows } from "@/features/production/product-status";
 import mockData from "./dss.json";
 
 describe("DSS mock data", () => {
@@ -97,5 +98,15 @@ describe("DSS mock data", () => {
     expect(rCards.some((card) => card.quantity === null && card.remainingQuantity > 0)).toBe(true);
     expect(pCards.some((card) => card.workStatus === "producing" && card.quantity !== null)).toBe(true);
     expect(rCards.every((card) => !("shipmentPlanId" in card))).toBe(true);
+  });
+
+  test("feeds daily production status with varied seeded production day plans", async () => {
+    const seed = await listDailyProductionSeed();
+    const rows = createDailyProductionRows(seed);
+
+    expect(rows.length).toBeGreaterThanOrEqual(6);
+    expect(new Set(rows.map((row) => row.productionDate)).size).toBeGreaterThanOrEqual(4);
+    expect(new Set(rows.map((row) => row.departmentCode))).toEqual(new Set(["R", "S", "P"]));
+    expect(rows.some((row) => row.plannedProductionCount >= 2)).toBe(true);
   });
 });

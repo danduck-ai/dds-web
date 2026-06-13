@@ -63,6 +63,8 @@ function makeCandidate(order: OrderListRow, product: OrderProductRecord): DailyP
     orderProductId: product.id,
     orderId: order.id,
     orderNo: order.orderNo,
+    orderRequestedDate: order.requestedDate,
+    orderProductCount: order.products.length,
     orderStatus: order.status,
     customerName: order.customerName,
     designNo: product.designNo,

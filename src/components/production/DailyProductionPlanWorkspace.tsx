@@ -3,7 +3,6 @@
 import {
   Button,
   Checkbox,
-  InlineNotification,
   Modal,
   NumberInput,
   Select,
@@ -11,6 +10,7 @@ import {
   Tag,
   TextInput,
   Tile,
+  ToastNotification,
 } from "@carbon/react";
 import { ArrowLeft, ArrowRight, Checkmark, Edit, Time } from "@carbon/icons-react";
 import {
@@ -24,7 +24,7 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { type CSSProperties, type PointerEvent, useMemo, useState } from "react";
+import { type CSSProperties, type PointerEvent, useEffect, useMemo, useState } from "react";
 
 import type { AppRole, DepartmentCode } from "@/features/orders/types";
 import {
@@ -42,7 +42,7 @@ import {
 } from "@/features/production/daily-planning";
 import type { DailyProductionCard, DailyProductionPlanItem, DailyProductionSeed } from "@/features/production/types";
 
-type DailyProductionProfile = {
+export type DailyProductionProfile = {
   displayName: string;
   email: string;
   role: AppRole;
@@ -223,15 +223,25 @@ function ScheduledProductionCard({
 
 export function DailyProductionPlanWorkspace({
   currentDate,
+  embedded = false,
+  initialDepartmentCode,
+  initialProductionDate: initialProductionDateOption,
   initialSeed,
+  onSaved,
   profile,
+  toastDurationMs = 3000,
 }: {
   currentDate: string;
+  embedded?: boolean;
+  initialDepartmentCode?: DepartmentCode;
+  initialProductionDate?: string;
   initialSeed: DailyProductionSeed;
+  onSaved?: (message: string) => void;
   profile: DailyProductionProfile;
+  toastDurationMs?: number;
 }) {
-  const initialProductionDate = currentDate.slice(0, 10);
-  const initialDepartment = getInitialDepartment(profile.departmentCode);
+  const initialProductionDate = initialProductionDateOption ?? currentDate.slice(0, 10);
+  const initialDepartment = initialDepartmentCode ?? getInitialDepartment(profile.departmentCode);
   const [productionDate, setProductionDate] = useState(initialProductionDate);
   const [departmentCode, setDepartmentCode] = useState<DepartmentCode>(initialDepartment);
   const [workStartTime, setWorkStartTime] = useState("09:00");
@@ -245,7 +255,6 @@ export function DailyProductionPlanWorkspace({
   const [selectedScheduledIds, setSelectedScheduledIds] = useState<Set<string>>(() => new Set());
   const [quantityModal, setQuantityModal] = useState<QuantityModalState | null>(null);
   const [quantityDrafts, setQuantityDrafts] = useState<Record<string, string>>({});
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmedItems, setConfirmedItems] = useState<DailyProductionPlanItem[]>([]);
   const [successMessage, setSuccessMessage] = useState("");
   const sensors = useSensors(
@@ -269,6 +278,18 @@ export function DailyProductionPlanWorkspace({
       const quantity = Number(quantityDrafts[card.id]);
       return Number.isFinite(quantity) && quantity > 0 && quantity <= card.remainingQuantity;
     }) ?? false;
+
+  useEffect(() => {
+    if (!successMessage) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setSuccessMessage("");
+    }, toastDurationMs);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [successMessage, toastDurationMs]);
 
   function createPlanningPanels(nextDepartmentCode: DepartmentCode, nextProductionDate: string) {
     return partitionDailyPlanningCards(
@@ -423,14 +444,20 @@ export function DailyProductionPlanWorkspace({
     resetCommitState();
   }
 
-  function handleConfirm() {
+  function handleSave() {
     if (!confirmationPlan.ok) {
       return;
     }
 
     setConfirmedItems(confirmationPlan.dayPlan.items);
-    setConfirmOpen(false);
-    setSuccessMessage("일간 생산 계획표가 확정되었습니다.");
+    const message = "일간 생산 계획표가 저장되었습니다.";
+
+    if (onSaved) {
+      onSaved(message);
+      return;
+    }
+
+    setSuccessMessage(message);
   }
 
   function handleWorkspacePointerDown(event: PointerEvent<HTMLElement>) {
@@ -456,15 +483,8 @@ export function DailyProductionPlanWorkspace({
     }
   }
 
-  return (
-    <main className="dss-page dss-production-page" onPointerDownCapture={handleWorkspacePointerDown}>
-      <header className="dss-page-header">
-        <div>
-          <h1>일간 생산 계획표 작성</h1>
-          <p>주문제품을 선택해 생산일과 부서 기준의 일간 생산계획표를 작성합니다.</p>
-        </div>
-      </header>
-
+  const workspaceContent = (
+    <>
       <section className="dss-production-controls" aria-label="일간 생산계획 조건">
         <TextInput
           id="daily-production-date"
@@ -510,21 +530,23 @@ export function DailyProductionPlanWorkspace({
           disabled={!confirmationPlan.ok || scheduledCards.length === 0}
           renderIcon={Checkmark}
           type="button"
-          onClick={() => setConfirmOpen(true)}
+          onClick={handleSave}
         >
-          확정
+          저장
         </Button>
       </section>
 
       {successMessage ? (
-        <InlineNotification
-          className="dss-production-notification"
-          hideCloseButton
-          kind="success"
-          lowContrast
-          subtitle={successMessage}
-          title="확정 완료"
-        />
+        <div className="dss-toast-stack" aria-live="polite">
+          <ToastNotification
+            hideCloseButton
+            kind="success"
+            lowContrast
+            statusIconDescription="성공"
+            subtitle={successMessage}
+            title="저장 완료"
+          />
+        </div>
       ) : null}
 
       <section className="dss-production-transfer" aria-label="일간 생산계획 편성">
@@ -701,21 +723,31 @@ export function DailyProductionPlanWorkspace({
         </Modal>
       ) : null}
 
-      {confirmOpen ? (
-        <Modal
-          danger
-          modalHeading="일간 생산 계획표를 확정할까요?"
-          onRequestClose={() => setConfirmOpen(false)}
-          onRequestSubmit={handleConfirm}
-          open={confirmOpen}
-          primaryButtonText="확정"
-          secondaryButtonText="계속 편집"
-          size="sm"
-        >
-          <p>확정하면 선택한 생산일, 부서, 생산 시작 시간, 카드 순서, 입력 수량이 일간 생산계획표에 저장됩니다.</p>
-          <p>확정 후에는 이 화면에서 되돌릴 수 없습니다.</p>
-        </Modal>
-      ) : null}
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <section
+        aria-label="일간 생산 계획 작성"
+        className="dss-production-page dss-production-page--embedded"
+        onPointerDownCapture={handleWorkspacePointerDown}
+      >
+        {workspaceContent}
+      </section>
+    );
+  }
+
+  return (
+    <main className="dss-page dss-production-page" onPointerDownCapture={handleWorkspacePointerDown}>
+      <header className="dss-page-header">
+        <div>
+          <h1>일간 생산 계획표 작성</h1>
+          <p>주문제품을 선택해 생산일과 부서 기준의 일간 생산계획표를 작성합니다.</p>
+        </div>
+      </header>
+
+      {workspaceContent}
     </main>
   );
 }

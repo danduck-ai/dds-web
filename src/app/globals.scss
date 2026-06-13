@@ -575,6 +575,196 @@ body {
   min-inline-size: 68rem;
 }
 
+.dss-product-status-page {
+  display: grid;
+  gap: $spacing-05;
+
+  .dss-page-header {
+    margin-block-end: 0;
+  }
+}
+
+.dss-product-status-switcher {
+  inline-size: min(100%, 32rem);
+}
+
+.dss-product-status-view-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-04;
+  flex-wrap: wrap;
+}
+
+.dss-product-status-table {
+  min-inline-size: 58rem;
+
+  strong,
+  span {
+    display: block;
+  }
+}
+
+.dss-product-status-day-table {
+  min-inline-size: 36rem;
+}
+
+.dss-product-status-order-table {
+  min-inline-size: 48rem;
+
+  tbody tr.dss-product-status-order-row > td {
+    background: $layer;
+    border-block-end: 1px solid $border-subtle;
+  }
+
+  tbody tr.dss-product-status-order-row:hover > td {
+    background: var(--cds-layer-hover, #393939);
+  }
+
+  tbody tr.dss-product-status-order-row[data-dss-expanded="true"] > td {
+    background: $layer;
+    border-block-end: 0;
+  }
+
+  tbody tr.dss-product-status-order-expanded-row > td {
+    padding: 0;
+    background: $layer;
+    border-block-start: 0;
+    border-block-end: 1px solid $border-subtle;
+  }
+}
+
+.dss-product-status-order-products {
+  padding: $spacing-04;
+  background: $layer;
+}
+
+.dss-product-status-table--nested {
+  min-inline-size: 54rem;
+
+  tbody tr > td {
+    background: $layer;
+    border-block-end: 1px solid $border-subtle;
+  }
+
+  tbody tr:hover > td {
+    background: var(--cds-layer-hover, #393939);
+  }
+}
+
+.dss-product-status-table__secondary {
+  @include type.type-style("label-01");
+
+  margin-block-start: $spacing-02;
+  color: $text-secondary;
+}
+
+.dss-product-status-drawer {
+  inline-size: min(100vw, 38rem);
+
+  .dss-order-drawer__header {
+    align-items: flex-start;
+
+    p {
+      @include type.type-style("body-compact-01");
+
+      margin: $spacing-02 0 0;
+      color: $text-secondary;
+    }
+  }
+}
+
+.dss-product-status-drawer__summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $spacing-04;
+  margin: 0;
+  padding: $spacing-04;
+  background: $layer;
+  border: 1px solid $border-subtle;
+
+  div {
+    min-inline-size: 0;
+  }
+
+  dt {
+    @include type.type-style("label-01");
+
+    color: $text-secondary;
+  }
+
+  dd {
+    @include type.type-style("body-compact-01");
+
+    min-inline-size: 0;
+    margin: $spacing-01 0 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.dss-product-status-plan-list {
+  display: grid;
+  border-block-start: 1px solid $border-subtle;
+}
+
+.dss-product-status-plan-list__row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 1fr) minmax(5rem, 0.8fr) minmax(5rem, 0.7fr);
+  gap: $spacing-04;
+  align-items: center;
+  padding: $spacing-03 0;
+  border-block-end: 1px solid $border-subtle;
+
+  span {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.dss-product-status-plan-list__row--header {
+  @include type.type-style("label-01");
+
+  color: $text-secondary;
+}
+
+.dss-product-status-drawer__empty {
+  min-block-size: 8rem;
+}
+
+.dss-product-status-drawer__form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: $spacing-04;
+  align-items: end;
+  padding-block-start: $spacing-05;
+  border-block-start: 1px solid $border-subtle;
+
+  .cds--btn {
+    min-inline-size: 5rem;
+  }
+}
+
+.dss-product-status-daily-planning-modal {
+  .cds--modal-container {
+    inline-size: min(96vw, 72rem);
+    max-block-size: min(92vh, 64rem);
+  }
+
+  .cds--modal-content {
+    padding-block-end: $spacing-05;
+  }
+}
+
+.dss-production-page--embedded {
+  .dss-production-transfer {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .dss-production-panel {
+    min-block-size: 28rem;
+  }
+}
+
 .dss-order-products {
   display: grid;
   gap: $spacing-04;
@@ -746,7 +936,9 @@ body {
   .dss-production-controls,
   .dss-production-transfer,
   .dss-production-scheduled-card,
-  .dss-production-quantity-modal__meta {
+  .dss-production-quantity-modal__meta,
+  .dss-product-status-drawer__summary,
+  .dss-product-status-drawer__form {
     grid-template-columns: 1fr;
   }
 

@@ -11,7 +11,7 @@ import {
   SideNavLink,
   Stack,
 } from "@carbon/react";
-import { Calendar, DocumentAdd, ListChecked, Logout, Product, UserMultiple } from "@carbon/icons-react";
+import { ChartLineData, DocumentAdd, ListChecked, Logout, Product, UserMultiple } from "@carbon/icons-react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
@@ -41,17 +41,17 @@ const menuByRole: Record<AppRole, MenuItem[]> = {
   A: [
     { href: "/orders/intake", label: "주문 접수", icon: DocumentAdd },
     { href: "/orders", label: "주문 현황", icon: ListChecked },
-    { href: "/production/daily-plans", label: "일간 생산 계획표 작성", icon: Calendar },
+    { href: "/production/product-status", label: "생산 현황", icon: ChartLineData },
     { href: "/reference/designs", label: "설계 관리", icon: Product },
     { href: "/reference/customers", label: "고객 관리", icon: UserMultiple },
   ],
   P: [
     { href: "/orders", label: "주문 현황", icon: ListChecked },
-    { href: "/production/daily-plans", label: "일간 생산 계획표 작성", icon: Calendar },
+    { href: "/production/product-status", label: "생산 현황", icon: ChartLineData },
   ],
   E: [
     { href: "/orders", label: "주문 현황", icon: ListChecked },
-    { href: "/production/daily-plans", label: "일간 생산 계획표 작성", icon: Calendar },
+    { href: "/production/product-status", label: "생산 현황", icon: ChartLineData },
     { href: "/reference/designs", label: "설계 관리", icon: Product },
     { href: "/reference/customers", label: "고객 관리", icon: UserMultiple },
   ],

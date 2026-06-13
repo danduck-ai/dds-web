@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test } from "vitest";
 
@@ -52,7 +52,7 @@ function releasedOrder(): OrderListRow {
   };
 }
 
-function renderWorkspace() {
+function renderWorkspace(options: { toastDurationMs?: number } = {}) {
   return render(
     <DailyProductionPlanWorkspace
       currentDate="2026-06-13"
@@ -63,6 +63,7 @@ function renderWorkspace() {
         role: "P",
         departmentCode: "S",
       }}
+      toastDurationMs={options.toastDurationMs}
     />,
   );
 }
@@ -100,9 +101,9 @@ describe("DailyProductionPlanWorkspace", () => {
     expect(screen.getByRole("checkbox", { name: "[동성전자] 압출 실리콘 가스켓 S 120개 (다음 출하 D-5)" })).toBeInTheDocument();
   });
 
-  test("confirms the daily plan with selected date, department, order products, and quantities", async () => {
+  test("saves the daily plan immediately and shows a temporary toast", async () => {
     const user = userEvent.setup();
-    renderWorkspace();
+    renderWorkspace({ toastDurationMs: 100 });
 
     await user.click(screen.getByRole("checkbox", { name: availableLabel }));
     await user.click(screen.getByRole("button", { name: "선택 제품 계획표에 추가" }));
@@ -110,9 +111,13 @@ describe("DailyProductionPlanWorkspace", () => {
     const dialog = screen.getByRole("dialog", { name: "생산수량 입력" });
     await user.type(within(dialog).getByRole("spinbutton", { name: "O-DSE-26061300001 압출 실리콘 가스켓 S 생산수량" }), "300");
     await user.click(within(dialog).getByRole("button", { name: "적용" }));
-    await user.click(screen.getByRole("button", { name: "확정" }));
-    await user.click(within(screen.getByRole("dialog", { name: "일간 생산 계획표를 확정할까요?" })).getByRole("button", { name: "확정" }));
+    await user.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(screen.getByText("일간 생산 계획표가 확정되었습니다.")).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "일간 생산 계획표를 확정할까요?" })).not.toBeInTheDocument();
+    expect(await screen.findByText("일간 생산 계획표가 저장되었습니다.")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.queryByText("일간 생산 계획표가 저장되었습니다.")).not.toBeInTheDocument();
+    });
   });
 });

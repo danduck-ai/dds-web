@@ -9,6 +9,8 @@ export type DailyProductionCandidate = {
   orderProductId: string;
   orderId: string;
   orderNo: string;
+  orderRequestedDate: string;
+  orderProductCount: number;
   orderStatus: string;
   customerName: string;
   designNo: string;
